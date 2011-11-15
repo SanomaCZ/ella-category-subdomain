@@ -1,0 +1,3 @@
+Django
+
+-e git+http://github.com/ella/ella.git@future/django-1.3#egg=ella
