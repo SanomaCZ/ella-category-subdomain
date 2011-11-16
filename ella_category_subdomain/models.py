@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category
 
-class SeoCat(models.Model):
+class CategorySubdomain(models.Model):
     category = models.OneToOneField(Category)
     subdomain_slug = models.SlugField(max_length=64)
 
