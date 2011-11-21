@@ -4,9 +4,9 @@ Created on 11.11.2011
 @author: whit
 '''
 from django.conf import settings
-from ella_seocats.models import SeoCat
+from ella_category_subdomain.models import CategorySubdomain
 
-class SeoCatsMiddleware:
+class CategorySubdomainMiddleware:
     """  """
 
     def process_request(self, request):
@@ -31,10 +31,10 @@ class SeoCatsMiddleware:
             subdomain = domain_parts[0].lower()
 
             try:
-                sc = SeoCat.objects.get(subdomain=subdomain)
-                if sc.site.pk == settings.SITE_ID:
-                    return sc.category
-            except SeoCat.DoesNotExist:
+                cs = CategorySubdomain.objects.get(subdomain=subdomain)
+                if cs.site.pk == settings.SITE_ID:
+                    return cs.category
+            except CategorySubdomain.DoesNotExist:
                 return None
 
         return None
