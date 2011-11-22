@@ -1,0 +1,16 @@
+<html>
+
+	<head>
+		<title></title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	</head>
+
+	<body>
+		<p>{% for cat in categories %}<a href={{ cat.get_absolute_url }}>{{ cat }}</a>, {% endfor %}</p>
+
+		{% block body %}
+
+		{% endblock body %}
+	</body>
+
+</html>

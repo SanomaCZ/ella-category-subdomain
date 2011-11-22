@@ -1,0 +1,9 @@
+{% extends "page/base.html" %}
+{% block body %}
+<h1>Listing for category {{ category.title }}</h1>
+<p>{{ category.description }}</p>
+
+{% for listing in listings %}
+    {% box listing for listing.target %}{% endbox %}
+{% endfor %}
+{% endblock body %}
