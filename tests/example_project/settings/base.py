@@ -41,7 +41,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
     'django.core.context_processors.auth',
     'ella.newman.context_processors.newman_media',
-    'example_project.service.context_processors.categories',
+    'example_project.service.context_processors.simple_debug',
 )
 
 MIDDLEWARE_CLASSES = (

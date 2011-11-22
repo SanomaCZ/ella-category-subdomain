@@ -1,6 +1,7 @@
 from ella.core.models import Category
 
-_categories = sorted(Category.objects.all())
+categories = sorted(Category.objects.all())
 
-def categories(request):
-    return {'categories': _categories}
+def simple_debug(request):
+    return {'categories': categories,
+            'request': request}

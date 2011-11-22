@@ -16,6 +16,22 @@
         }
     },
     {
+        "pk": 3,
+        "model": "auth.message",
+        "fields": {
+            "message": "The site \"example.localhost\" was changed successfully.",
+            "user": 1
+        }
+    },
+    {
+        "pk": 4,
+        "model": "auth.message",
+        "fields": {
+            "message": "The site \"example.localhost\" was changed successfully.",
+            "user": 1
+        }
+    },
+    {
         "pk": 25,
         "model": "contenttypes.contenttype",
         "fields": {
@@ -404,7 +420,7 @@
         "pk": 1,
         "model": "sites.site",
         "fields": {
-            "domain": "example.com",
+            "domain": "example.localhost",
             "name": "Example site"
         }
     },
@@ -1710,6 +1726,32 @@
         "fields": {
             "codename": "delete_site",
             "name": "Can delete site",
+            "content_type": 8
+        }
+    },
+    {
+        "pk": 24,
+        "model": "admin.logentry",
+        "fields": {
+            "action_flag": 2,
+            "action_time": "2011-11-22 18:30:02",
+            "object_repr": "example.localhost",
+            "object_id": "1",
+            "change_message": "Changed domain.",
+            "user": 1,
+            "content_type": 8
+        }
+    },
+    {
+        "pk": 23,
+        "model": "admin.logentry",
+        "fields": {
+            "action_flag": 2,
+            "action_time": "2011-11-22 18:26:38",
+            "object_repr": "example.localhost",
+            "object_id": "1",
+            "change_message": "Changed domain.",
+            "user": 1,
             "content_type": 8
         }
     },

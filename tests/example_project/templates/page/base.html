@@ -6,7 +6,7 @@
 	</head>
 
 	<body>
-		<p>{% for cat in categories %}<a href={{ cat.get_absolute_url }}>{{ cat }}</a>, {% endfor %}</p>
+		{% include "inc/simple_debug.html" %}
 
 		{% block body %}
 
