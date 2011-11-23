@@ -47,6 +47,7 @@ class CategorySubdomainMiddleware:
         Category.get_absolute_url = category_get_absolute_url
 
         def placement_get_absolute_url(placement, domain=False):
+            # taken from ella.core.models.Placement except try/except statement
             obj = placement.publishable
             category = placement.category
 
@@ -95,17 +96,13 @@ class CategorySubdomainMiddleware:
         Placement.get_absolute_url = placement_get_absolute_url
 
     def process_request(self, request):
-
+        if request.path_info.startswith(settings.MEDIA_URL):
+            return None
         sc = self._get_subdomain_category(request.get_host())
         if sc is not None:
-            #path = request.path
             request.path_info = '/%s%s' % (sc.slug, request.path_info)
             request.path = '/%s%s' % (sc.slug, request.path)
         return None
-
-    # def process_view(self, request):
-    #     return None
-
 
     def process_response(self, request, response):
         return response
