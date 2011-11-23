@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 from ella.core.models import Category
 
@@ -11,12 +12,17 @@ class CategorySubdomain(models.Model):
         return self.subdomain_slug
 
     def get_absolute_url(self):
-        d = self.category.site.domain
+        domain = self.category.site.domain
         # FIXME: ugly
-        if d.startswith('www.'):
-            return "http://%s/" % d.replace('www', self.subdomain_slug)
+        if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
+            port = ':%s' % settings.DEVELOPMENT_SERVER_PORT
         else:
-            return "http://%s.%s/" % (self.subdomain_slug, d)
+            port = ''
+        if domain.startswith('www.'):
+            subdomain = domain.replace('www', self.subdomain_slug)
+            return "http://%s%s/" % (subdomain, port)
+        else:
+            return "http://%s.%s%s/" % (self.subdomain_slug, domain, port)
 
     class Meta:
         unique_together = (('category', 'subdomain_slug'),)

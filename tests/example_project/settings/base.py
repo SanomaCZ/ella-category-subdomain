@@ -48,7 +48,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'ella_category_subdomain.middleware.CategorySubdomainMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'example_project.urls'
