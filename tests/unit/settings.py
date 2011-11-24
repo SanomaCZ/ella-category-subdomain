@@ -1,6 +1,29 @@
+from tempfile import gettempdir
 from os.path import dirname, join, normpath, pardir
 
 FILE_ROOT = normpath(join(dirname(__file__), pardir))
+
+DEBUG = True                                                                                            
+TEMPLATE_DEBUG = DEBUG                                                                                  
+DISABLE_CACHE_TEMPLATE = DEBUG                                                                                                       
+                                                                                                        
+DATABASE_ENGINE = 'sqlite3'                                                                             
+DATABASE_NAME = join(gettempdir(), 'djangobaselibrary_unit_project.db')                                 
+TEST_DATABASE_NAME =join(gettempdir(), 'test_unit_project.db')                                          
+DATABASE_USER = ''                                                                                      
+DATABASE_PASSWORD = ''                                                                                  
+DATABASE_HOST = ''                                                                                      
+DATABASE_PORT = ''                                                                                      
+                                                                                                        
+                                                                                                        
+TIME_ZONE = 'Europe/Prague'                                                                             
+                                                                                                        
+LANGUAGE_CODE = 'en-us'                                                                                 
+                                                                                                        
+SITE_ID = 1                                                                                             
+                                                                                                        
+# Make this unique, and don't share it with anybody.                                                    
+SECRET_KEY = '88b-01f^x4lh$-s5-hdccnicekg07)niir2g6)93!0#k(=mfv$'                                       
 
 USE_I18N = True
 
