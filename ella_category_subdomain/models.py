@@ -36,5 +36,4 @@ class CategorySubdomain(models.Model):
         unique_together = (('category', 'subdomain_slug'),)
         verbose_name = _('SEO Category')
         verbose_name_plural = _('SEO Categories')
-        app_name = _('')
 
