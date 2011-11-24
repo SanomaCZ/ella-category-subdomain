@@ -1,6 +1,7 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.conf import settings
 
 from ella.core.models import Category
 
@@ -24,11 +25,16 @@ class CategorySubdomain(models.Model):
         else:
             return "http://%s.%s%s/" % (self.subdomain_slug, domain, port)
 
+    def clean(self):
+        """Validates that only first level category is referenced by the CategorySubdomain
+        """
+        if ((self.category.tree_parent is None) or
+            (self.category.tree_parent.tree_parent is not None)):
+            raise ValidationError(_('Subdomain can only reference a first level categories'))
+
     class Meta:
         unique_together = (('category', 'subdomain_slug'),)
         verbose_name = _('SEO Category')
         verbose_name_plural = _('SEO Categories')
-
-# XXX: monkey-patch ella views?
-# from ella.core.views import ObjectDetail, ListContentType
+        app_name = _('')
 
