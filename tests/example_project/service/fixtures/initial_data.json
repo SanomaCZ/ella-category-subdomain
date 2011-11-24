@@ -1,6 +1,14 @@
 [
     {
         "pk": 1,
+        "model": "sites.site",
+        "fields": {
+            "domain": "example.localhost",
+            "name": "example.localhost"
+        }
+    },
+    {
+        "pk": 1,
         "model": "core.category",
         "fields": {
             "tree_parent": null,
