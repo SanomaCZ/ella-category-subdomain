@@ -1,56 +1,34 @@
 from django.contrib.sites.models import Site
-
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from djangosanetesting import DatabaseTestCase
 
 from ella.core.models import Category
-
 from ella_category_subdomain.models import CategorySubdomain
 
-class TestModel(DatabaseTestCase):
+from unit.helpers import create_categories
+
+class TestModelCase(DatabaseTestCase):
 
     def setUp(self):
-        super(TestModel, self).setUp()
+        super(TestModelCase, self).setUp()
+        create_categories(self)
 
-        site = Site.objects.create(
-            domain=u'example.com',
-            name=u'main domain',
-        )
+    def test_root_category_cannot_be_user_for_subdomain(self):
+        cs = CategorySubdomain(category = self.root_category, subdomain_slug = self.root_category.slug)
+        self.assert_raises(ValidationError, cs.clean)
 
-        self.root = Category.objects.create(
-            title=u'Main',
-            slug=u'main',
-            description=u'Main Category',
-            site=site,
-        )
+    def test_first_level_category_validates_for_subdomain(self):
+        cs = CategorySubdomain(category = self.category_nested_1, subdomain_slug = self.category_nested_1.slug)
+        self.assert_is_none(cs.clean())
 
-        self.first_level_1 = Category.objects.create(
-            title=u'First 1',
-            slug=u'first_1',
-            description=u'First Category',
-            site=site,
-            tree_parent=self.root,
-        )
+    def test_second_level_category_cannot_be_user_for_subdomain(self):
+        cs = CategorySubdomain(category = self.category_nested_nested_2, subdomain_slug = self.category_nested_nested_2.slug)
+        self.assert_raises(ValidationError, cs.clean)
 
-        self.first_level_2 = Category.objects.create(
-            title=u'First 2',
-            slug=u'first_2',
-            description=u'First Category',
-            site=site,
-            tree_parent=self.root,
-        )
-
-        self.second_level_2 = Category.objects.create(
-            title=u'Second 1',
-            slug=u'second_1',
-            description=u'Second Category',
-            site=site,
-            tree_parent=self.first_level_1,
-        )
-
-    def test_equals(self):
-        self.assert_equals(1,1)
-
-    def test_root_category(self):
-        cs = CategorySubdomain(category = self.root, subdomain_slug = "root")
-        self.assert_va
+    def test_category_can_be_referenced_by_only_one_subdomain(self):
+        cs1 = CategorySubdomain(category = self.category_nested_1, subdomain_slug = self.category_nested_1.slug)
+        cs1.save()
+        cs2 = CategorySubdomain(category = self.category_nested_1, subdomain_slug = self.category_nested_1.slug)
+        self.assert_raises(IntegrityError, cs2.save)
 
