@@ -6,12 +6,12 @@ from djangosanetesting import DatabaseTestCase
 from ella.core.models import Category
 from ella_category_subdomain.models import CategorySubdomain
 
-from helpers import create_categories
+from unit.helpers import create_categories
 
 class TestModelCase(DatabaseTestCase):
 
     def setUp(self):
-        super(TestModel, self).setUp()
+        super(TestModelCase, self).setUp()
         create_categories(self)
 
     def test_root_category(self):
