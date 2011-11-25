@@ -6,7 +6,7 @@
 	</head>
 
 	<body>
-		{% include "inc/simple_debug.html" %}
+		{% if request %}{% include "inc/simple_debug.html" %}{% endif %}
 
 		{% block body %}
 

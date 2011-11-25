@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -11,18 +13,27 @@ class CategorySubdomain(models.Model):
         return self.subdomain_slug
 
     def get_absolute_url(self):
-        d = self.category.site.domain
+        domain = self.category.site.domain
         # FIXME: ugly
-        if d.startswith('www.'):
-            return "http://%s/" % d.replace('www', self.subdomain_slug)
+        if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
+            port = ':%s' % settings.DEVELOPMENT_SERVER_PORT
         else:
-            return "http://%s.%s/" % (self.subdomain_slug, d)
+            port = ''
+        if domain.startswith('www.'):
+            subdomain = domain.replace('www', self.subdomain_slug)
+            return "http://%s%s/" % (subdomain, port)
+        else:
+            return "http://%s.%s%s/" % (self.subdomain_slug, domain, port)
+
+    def clean(self):
+        """Validates that only first level category is referenced by the CategorySubdomain
+        """
+        if ((self.category.tree_parent is None) or
+            (self.category.tree_parent.tree_parent is not None)):
+            raise ValidationError(_('Subdomain can only reference a first level categories'))
 
     class Meta:
         unique_together = (('category', 'subdomain_slug'),)
         verbose_name = _('SEO Category')
         verbose_name_plural = _('SEO Categories')
-
-# XXX: monkey-patch ella views?
-# from ella.core.views import ObjectDetail, ListContentType
 
