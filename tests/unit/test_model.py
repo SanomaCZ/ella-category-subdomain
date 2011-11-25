@@ -14,19 +14,19 @@ class TestModelCase(DatabaseTestCase):
         super(TestModelCase, self).setUp()
         create_categories(self)
 
-    def test_root_category(self):
+    def test_root_category_cannot_be_user_for_subdomain(self):
         cs = CategorySubdomain(category = self.root_category, subdomain_slug = self.root_category.slug)
         self.assert_raises(ValidationError, cs.clean)
 
-    def test_first_nested_category(self):
+    def test_first_level_category_validates_for_subdomain(self):
         cs = CategorySubdomain(category = self.category_nested_1, subdomain_slug = self.category_nested_1.slug)
         self.assert_is_none(cs.clean())
 
-    def test_second_nested_category(self):
+    def test_second_level_category_cannot_be_user_for_subdomain(self):
         cs = CategorySubdomain(category = self.category_nested_nested_2, subdomain_slug = self.category_nested_nested_2.slug)
         self.assert_raises(ValidationError, cs.clean)
 
-    def test_single_reference_to_category(self):
+    def test_category_can_be_referenced_by_only_one_subdomain(self):
         cs1 = CategorySubdomain(category = self.category_nested_1, subdomain_slug = self.category_nested_1.slug)
         cs1.save()
         cs2 = CategorySubdomain(category = self.category_nested_1, subdomain_slug = self.category_nested_1.slug)
