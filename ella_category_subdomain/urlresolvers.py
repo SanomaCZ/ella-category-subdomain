@@ -1,3 +1,5 @@
+import pdb
+
 from django.core import RegexURLResolver, RegexURLPattern, LocaleRegexURLResolver
 
 class CategorySubdomainURLResolver(RegexURLResolver):
@@ -5,16 +7,19 @@ class CategorySubdomainURLResolver(RegexURLResolver):
 
     def resolve(self, path):
         resolved = super(CategorySubdomainURLPattern, self).resolve(path)
+        pdb.set_trace()
         return resolved
 
     def reverse(self, lookup_view, *args, **kwargs):
         original = super(CategorySubdomainURLPattern, self).reverse(lookup_view, *args, **kwargs)
+        pdb.set_trace()
         return original
 
 class CategorySubdomainURLPattern(RegexURLPattern):
 
     def resolve(self, path):
         resolved = super(CategorySubdomainURLPattern, self).resolve(path)
+        pdb.set_trace()
         return resolved
 
 class CategorySubdomainLocaleURLResolver(CategorySubdomainURLResolver):
