@@ -1,5 +1,9 @@
 <p style="font-weight: bold">Simple debug</p>
-<p>Categories: {% for cat in categories %}<a href="{% url category_detail cat.slug %}">{{ cat }}</a>, {% endfor %}</p>
+<p>Categories: {% for cat in categories %}
+{% if cat.tree_path %}
+<a href="{% url category_detail cat.tree_path %}">{{ cat.tree_path }}</a>,
+{% endif %}
+{% endfor %}</p>
 <p>request.get_host() = {{ request.get_host }}</p>
 <p>request.path = {{ request.path }}</p>
 <p>request.path_info = {{ request.path_info }}</p>
