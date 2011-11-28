@@ -1,7 +1,11 @@
 <p style="font-weight: bold">Simple debug</p>
 <p>Categories: {% for cat in categories %}
+<br />
+<a href="http://{{ request.get_host }}/{{ cat.tree_path }}/">{{ cat }}</a>,
 {% if cat.tree_path %}
-<a href="{% url category_detail cat.tree_path %}">{{ cat.tree_path }}</a>,
+<a href="{% url category_detail cat.tree_path %}">{{ cat }}</a>,
+{% else %}
+<a href="{% url root_homepage %}">{{ cat }}</a>,
 {% endif %}
 {% endfor %}</p>
 <p>request.get_host() = {{ request.get_host }}</p>

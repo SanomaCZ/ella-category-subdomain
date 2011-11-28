@@ -35,20 +35,19 @@ def get_url_with_subdomain(parsed_url, category_subdomain):
     return urlunparse(parsed_url_list)
 
 
+def get_url_without_subdomain(parsed_url):
+    return parsed_url
+
 def patch_reverse(reverse):
     def wrapper(*args, **kwargs):
         url = reverse(*args, **kwargs)
         logging.warning("Unpatched reverse: %r\n" % url)
-
         parsed_url = urlparse(reverse(*args, **kwargs))
         logging.warning("Parsed unpatched reverse: %r\n" % (parsed_url,))
-
         category_subdomain_list = [x for x in CategorySubdomain.objects.all()
               if parsed_url.path.startswith('/%s/' % x.category.tree_path)]
-
         if not category_subdomain_list:
-            return url
-
+            return get_url_without_subdomain(parsed_url)
         assert len(category_subdomain_list) == 1, 'This should be always 1!'
         return get_url_with_subdomain(parsed_url, category_subdomain_list[0])
     return wrapper
