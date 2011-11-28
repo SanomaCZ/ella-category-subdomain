@@ -5,6 +5,15 @@ from django.core import RegexURLResolver, RegexURLPattern, LocaleRegexURLResolve
 class CategorySubdomainURLResolver(RegexURLResolver):
     """The class changes the behaviour of the parent to support Category Subdomains."""
 
+    def __init__(self, parent_instance):
+        super(CategorySubdomainURLResolver, self).__init__(
+            regex = parent_instance.regex,
+            urlconf_name = parent_instance.urlconf_name,
+            default_kwargs=parent_instance.default_kwargs,
+            app_name=parent_instance.app_name,
+            namespace=parent_instance,
+        )
+
     def resolve(self, path):
         resolved = super(CategorySubdomainURLPattern, self).resolve(path)
         pdb.set_trace()
@@ -17,6 +26,14 @@ class CategorySubdomainURLResolver(RegexURLResolver):
 
 class CategorySubdomainURLPattern(RegexURLPattern):
 
+    def __init__(self, parent_instance):
+        super(CategorySubdomainURLResolver, self).__init__(
+            regex=parent_instance.regex,
+            callback=parent_instance.callback,
+            default_args=parent_instance.default_args,
+            name=parent_instance.name
+        )
+
     def resolve(self, path):
         resolved = super(CategorySubdomainURLPattern, self).resolve(path)
         pdb.set_trace()
@@ -26,6 +43,6 @@ class CategorySubdomainLocaleURLResolver(CategorySubdomainURLResolver):
 
     regex = LocaleRegexURLResolver.regex
 
-    def __init__(self, urlconf_name, default_kwargs=None, app_name=None, namespace=None):
-        super(CategorySubdomainLocaleURLResolver, self).__init__(
-            None, urlconf_name, default_kwargs, app_name, namespace)
+    def __init__(self, parent_instance):
+        super(CategorySubdomainLocaleURLResolver, self).__init__(parent_instance)
+
