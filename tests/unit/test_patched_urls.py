@@ -2,9 +2,15 @@ from django import template
 from django.core.urlresolvers import reverse
 from djangosanetesting import DatabaseTestCase
 
+from ella_category_subdomain.monkeypatch import do_monkeypatch
+
 from unit.helpers import create_categories
 
 class TestAbsoluteURLsCase(DatabaseTestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(TestAbsoluteURLsCase, self).__init__(*args, **kwargs)
+        do_monkeypatch()
 
     def setUp(self):
         create_categories(self)
