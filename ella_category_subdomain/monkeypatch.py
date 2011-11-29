@@ -41,13 +41,10 @@ def get_url_with_subdomain(parsed_url, category_subdomain):
 
     # Get subdomain for given category.
     domain = '%s.%s' % (subdomain_slug, get_domain(strip_www=True))
-    logging.warning("domain = %r" % domain)
-
 
     # Change parsed_url_list.
     parsed_url_list[1:3] = domain, new_path
     update_parsed_url_list(parsed_url_list)
-    logging.warning("changed parsed_url_list = %r" % parsed_url_list)
 
     # Construct and return new url.
     return urlunparse(parsed_url_list)
@@ -55,7 +52,6 @@ def get_url_with_subdomain(parsed_url, category_subdomain):
 
 def get_url_without_subdomain(parsed_url):
     parts = parsed_url.netloc.split('.')
-    logging.warning("get_url_without_subdomain.parts = %r" % parts)
 
     # We will need mutable version of parsed_url.
     parsed_url_list = list(parsed_url)
@@ -72,7 +68,6 @@ def patch_reverse(reverse):
         # Get a result of original Django reverse.
         # Parse url.
         parsed_url = urlparse(reverse(*args, **kwargs))
-        logging.warning("Parsed unpatched reverse: %r\n" % (parsed_url,))
 
         # If a path of the original Django reverse starts with tree_path
         # of a category with subdomain, add the appropriate CategorySubdomain
@@ -80,7 +75,6 @@ def patch_reverse(reverse):
         # FIXME: It desperately requires another approach.
         category_subdomain_list = [x for x in CategorySubdomain.objects.all()
               if parsed_url.path.startswith('/%s/' % x.category.tree_path)]
-        logging.warning("category_subdomain_list = %r\n" % (parsed_url,))
 
         # If category_subdomain_list is empty, return url without sudomain (of
         # the lowest possible level).
@@ -103,9 +97,7 @@ def patch_reverse(reverse):
 def do_monkeypatch():
     # Replace django.core.urlresolvers.reverse and do it only once.
     if not hasattr(urlresolvers.reverse, '_original_reverse'):
-        logging.warning("Doing django.core.urlresolvers.reverse monkeypatch!")
         urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
     # Replace ella.core.models.main.Category.get_absolute_url
     if not hasattr(Category.get_absolute_url, '_original_reverse'):
-        logging.warning("Doing Category.get_absolute_url monkeypatch!")
         Category.get_absolute_url = patch_reverse(Category.get_absolute_url)
