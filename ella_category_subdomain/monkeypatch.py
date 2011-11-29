@@ -53,7 +53,7 @@ def get_url_without_subdomain(parsed_url):
 
     # Get all_sites domains.
     # FIXME: It desperately requires another approach.
-    all_sites = [x.domain for x in Site.objects.all()]
+    all_domains = [x.domain for x in Site.objects.all()]
 
     for i in range(2, len(parts)):
         # Construct domains up from the second level
@@ -72,7 +72,6 @@ def get_url_without_subdomain(parsed_url):
 def patch_reverse(reverse):
     def wrapper(*args, **kwargs):
         # Get a result of original Django reverse.
-        # FIXME: We can get MatchResult, no basestring.
         # Parse url.
         parsed_url = urlparse(reverse(*args, **kwargs))
         logging.warning("Parsed unpatched reverse: %r\n" % (parsed_url,))
@@ -98,14 +97,16 @@ def patch_reverse(reverse):
         # Finally, return url with correct subdomain and path.
         return get_url_with_subdomain(parsed_url, category_subdomain_list[0])
 
-    wrapper.original_reverse = reverse
+    wrapper._original_reverse = reverse
     return wrapper
 
 
 def do_monkeypatch():
-    # Replace django.core.urlresolvers.reverse.
-    urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
+    # Replace django.core.urlresolvers.reverse and do it only once.
+    if not hasattr(urlresolvers.reverse, '_original_reverse'):
+        urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
 
 def undo_monkeypatch():
-    if hasattr(urlresovers.reverse, 'original_reverse'):
-        pass
+    # Revert patch to original.
+    if hasattr(urlresovers.reverse, '_original_reverse'):
+        urlresolver.reverse = urlresolver.reverse.original_reverse
