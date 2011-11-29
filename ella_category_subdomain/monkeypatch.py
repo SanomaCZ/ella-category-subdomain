@@ -14,7 +14,7 @@ from ella_category_subdomain.urlresolvers import CategorySubdomainURLResolver
 from ella.core.models.main import Category
 
 
-def get_domain(strip_www=True):
+def get_domain(strip_www=False):
     domain = Site.objects.get(pk=settings.SITE_ID).domain
     return domain[4:] if domain.startswith('www.') and strip_www else domain
 
@@ -63,33 +63,36 @@ def get_url_without_subdomain(parsed_url):
     return urlunparse(parsed_url_list)
 
 
+def get_url(url):
+    # Parse url.
+    parsed_url = urlparse(url)
+
+    # If a path of the original Django reverse starts with tree_path
+    # of a category with subdomain, add the appropriate CategorySubdomain
+    # to category_subdomain_list.
+    # FIXME: It desperately requires another approach.
+    category_subdomain_list = [x for x in CategorySubdomain.objects.all()
+          if parsed_url.path.startswith('/%s/' % x.category.tree_path)]
+
+    # If category_subdomain_list is empty, return url without sudomain (of
+    # the lowest possible level).
+    if not category_subdomain_list:
+        return get_url_without_subdomain(parsed_url)
+
+    # Now, category_subdomain_list should contain just one
+    # CategorySubdomain instance (because of model validation).
+    # Otherwise at least on of them would be double or more nested
+    # category.
+    assert len(category_subdomain_list) == 1, 'This should be always 1!'
+
+    # Finally, return url with correct subdomain and path.
+    return get_url_with_subdomain(parsed_url, category_subdomain_list[0])
+
+
 def patch_reverse(reverse):
     def wrapper(*args, **kwargs):
-        # Get a result of original Django reverse.
-        # Parse url.
-        parsed_url = urlparse(reverse(*args, **kwargs))
-
-        # If a path of the original Django reverse starts with tree_path
-        # of a category with subdomain, add the appropriate CategorySubdomain
-        # to category_subdomain_list.
-        # FIXME: It desperately requires another approach.
-        category_subdomain_list = [x for x in CategorySubdomain.objects.all()
-              if parsed_url.path.startswith('/%s/' % x.category.tree_path)]
-
-        # If category_subdomain_list is empty, return url without sudomain (of
-        # the lowest possible level).
-        if not category_subdomain_list:
-            return get_url_without_subdomain(parsed_url)
-
-        # Now, category_subdomain_list should contain just one
-        # CategorySubdomain instance (because of model validation).
-        # Otherwise at least on of them would be double or more nested
-        # category.
-        assert len(category_subdomain_list) == 1, 'This should be always 1!'
-
-        # Finally, return url with correct subdomain and path.
-        return get_url_with_subdomain(parsed_url, category_subdomain_list[0])
-
+        # Get url from a result of original Django reverse.
+        return get_url(reverse(*args, **kwargs))
     wrapper._original_reverse = reverse
     return wrapper
 

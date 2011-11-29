@@ -20,6 +20,7 @@ class CategorySubdomainMiddleware:
         do_monkeypatch()
 
     def process_request(self, request):
+        # FIXME: Permanent redirect from old url.
         request.path = request.path_info =\
                 self._translate_path(request.get_host(), request.path)
         return None
