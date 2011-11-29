@@ -73,9 +73,6 @@ def patch_reverse(reverse):
     def wrapper(*args, **kwargs):
         # Get a result of original Django reverse.
         # FIXME: We can get MatchResult, no basestring.
-        url = reverse(*args, **kwargs)
-        logging.warning("Unpatched reverse: %r\n" % url)
-
         # Parse url.
         parsed_url = urlparse(reverse(*args, **kwargs))
         logging.warning("Parsed unpatched reverse: %r\n" % (parsed_url,))
@@ -100,9 +97,15 @@ def patch_reverse(reverse):
 
         # Finally, return url with correct subdomain and path.
         return get_url_with_subdomain(parsed_url, category_subdomain_list[0])
+
+    wrapper.original_reverse = reverse
     return wrapper
 
 
 def do_monkeypatch():
     # Replace django.core.urlresolvers.reverse.
     urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
+
+def undo_monkeypatch():
+    if hasattr(urlresovers.reverse, 'original_reverse'):
+        pass
