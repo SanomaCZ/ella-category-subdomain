@@ -11,6 +11,7 @@ from .models import CategorySubdomain
 
 from ella_category_subdomain.urlresolvers import CategorySubdomainURLPattern
 from ella_category_subdomain.urlresolvers import CategorySubdomainURLResolver
+from ella.core.models.main import Category
 
 
 def get_url_with_subdomain(parsed_url, category_subdomain):
@@ -104,9 +105,16 @@ def patch_reverse(reverse):
 def do_monkeypatch():
     # Replace django.core.urlresolvers.reverse and do it only once.
     if not hasattr(urlresolvers.reverse, '_original_reverse'):
+        logging.warning("Doing monkeypatch!")
         urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
+    # Replace ella.core.models.main.Category.get_absolute_url
+    if not hasattr(Category.get_absolute_url, '_original_reverse'):
+        logging.warning("Doing monkeypatch!")
+        Category.get_absolute_url = patch_reverse(Category.get_absolute_url)
+
 
 def undo_monkeypatch():
     # Revert patch to original.
     if hasattr(urlresovers.reverse, '_original_reverse'):
+        logging.warning("Undoing monkeypatch!")
         urlresolver.reverse = urlresolver.reverse.original_reverse
