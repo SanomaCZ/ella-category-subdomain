@@ -35,7 +35,7 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
 
     def test_root_category_reverse_works_unaffected(self):
         from django.core.urlresolvers import reverse
-        self.assert_equals('http://example.com/', reverse('category_detail', args=(self.root_category.tree_path,)))
+        self.assert_equals('http://example.com/', reverse('category_detail', args=('/',)))
 
     def test_category_reverse_is_patched(self):
         from django.core.urlresolvers import reverse
@@ -56,16 +56,16 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
     # url tag tests
 
     def test_root_category_url_tag_work_unaffected(self):
-        t = template.Template('{% url category_detail category.tree_path %}')
+        t = template.Template('{% url category_detail category %}')
 
-        var = {'category' : self.root_category,}
+        var = {'category' : '/',}
         self.assert_equals('http://example.com/', t.render(template.Context(var)))
 
     def test_root_article_url_tag_work_unaffected(self):
         t = template.Template('{% url object_detail category year month day content_type slug %}')
 
-        var = {'category' : self.root_category.tree_path, 'content_type': 'articles', 'slug': self.placement_root.slug, 'year': 2011, 'month': 11, 'day': 1}
-        self.assert_equals('http://example.com/', t.render(template.Context(var)))
+        var = {'category' : '/', 'content_type': 'articles', 'slug': self.placement_root.slug, 'year': 2011, 'month': 11, 'day': 1}
+        self.assert_equals('http://example.com/2011/11/1/articles/root-article/', t.render(template.Context(var)))
 
     def test_url_tag_is_patched(self):
         t = template.Template('{% url category_detail category.tree_path %}')
@@ -89,7 +89,7 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
         t = template.Template('{% url object_detail category year month day content_type slug %}')
 
         var = {'category' : self.category_nested_2.tree_path, 'content_type': 'articles', 'slug': self.placement_nested_2.slug, 'year': 2011, 'month': 11, 'day': 1}
-        self.assert_equals('http://example.com//nested-2/2011/11/1/articles/nested-2-article/', t.render(template.Context(var)))
+        self.assert_equals('http://example.com/nested-2/2011/11/1/articles/nested-2-article/', t.render(template.Context(var)))
 
     def test_no_subdomain_second_level_category_url_tag_works_unaffected(self):
         t = template.Template('{% url category_detail category.tree_path %}')
