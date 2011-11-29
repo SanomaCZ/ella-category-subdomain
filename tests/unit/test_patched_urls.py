@@ -61,6 +61,12 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
         var = {'category' : self.root_category,}
         self.assert_equals('http://example.com/', t.render(template.Context(var)))
 
+    def test_root_article_url_tag_work_unaffected(self):
+        t = template.Template('{% url object_detail category year month day content_type slug %}')
+
+        var = {'category' : self.root_category.tree_path, 'content_type': 'articles', 'slug': self.placement_root.slug, 'year': 2011, 'month': 11, 'day': 1}
+        self.assert_equals('http://example.com/', t.render(template.Context(var)))
+
     def test_url_tag_is_patched(self):
         t = template.Template('{% url category_detail category.tree_path %}')
 
@@ -78,6 +84,12 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
 
         var = {'category' : self.category_nested_2,}
         self.assert_equals('http://example.com/nested-2/', t.render(template.Context(var)))
+
+    def test_no_subdomain_article_url_tag_work_unaffected(self):
+        t = template.Template('{% url object_detail category year month day content_type slug %}')
+
+        var = {'category' : self.category_nested_2.tree_path, 'content_type': 'articles', 'slug': self.placement_nested_2.slug, 'year': 2011, 'month': 11, 'day': 1}
+        self.assert_equals('http://example.com//nested-2/2011/11/1/articles/nested-2-article/', t.render(template.Context(var)))
 
     def test_no_subdomain_second_level_category_url_tag_works_unaffected(self):
         t = template.Template('{% url category_detail category.tree_path %}')

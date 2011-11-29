@@ -1,9 +1,13 @@
+import datetime
+import logging
+
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 
 from ella.core.models import Category
 from ella.core.models import Author
+from ella.core.models import Placement
 from ella.articles.models import Article
 from ella_category_subdomain.models import CategorySubdomain
 
@@ -29,24 +33,32 @@ def create_categories(case):
     case.category_subdomain_nested_1 = CategorySubdomain.objects.create(category=case.category_nested_1, subdomain_slug='nested-one')
     case.category_subdomain_nested_1.save()
 
-    content_type = ContentType.objects.get_for_model(Article)
-    content_type.save()
+    publish_from = datetime.datetime(2011, 9, 1)
 
     author = Author.objects.create(name='User', slug='user')
     author.save()
 
-    case.article_root = Article(content_type=content_type, category=case.root_category, title='Root Article', slug='root-article',)
+    case.article_root = Article(category=case.root_category, title='Root Article', slug='root-article',)
     case.article_root.save()
     case.article_root.authors.add(author)
-    case.article_root.save()
 
-    case.article_nested_1 = Article(content_type=content_type, category=case.category_nested_1, title='Nested 1 Article', slug='nested-1-article',)
+    case.placement_root = Placement.objects.create(publishable=case.article_root, category=case.root_category, publish_from=publish_from,)
+    case.placement_root.save()
+
+    case.article_nested_1 = Article(category=case.category_nested_1, title='Nested 1 Article', slug='nested-1-article',)
     case.article_nested_1.save()
     case.article_nested_1.authors.add(author)
-    case.article_nested_1.save()
 
-    case.article_nested_nested_1 = Article(content_type=content_type, category=case.category_nested_nested_1, title='Nested Nested 1 Article', slug='nested-nested-1-article',)
+    case.placement_nested_1 = Placement.objects.create(publishable=case.article_nested_1, category=case.category_nested_1, publish_from=publish_from,)
+    case.placement_nested_1.save()
+
+    case.article_nested_nested_1 = Article(category=case.category_nested_nested_1, title='Nested Nested 1 Article', slug='nested-nested-1-article',)
     case.article_nested_nested_1.save()
     case.article_nested_nested_1.authors.add(author)
-    case.article_nested_nested_1.save()
 
+    case.article_nested_2 = Article(category=case.category_nested_2, title='Nested 2 Article', slug='nested-2-article',)
+    case.article_nested_2.save()
+    case.article_nested_2.authors.add(author)
+
+    case.placement_nested_2 = Placement.objects.create(publishable=case.article_nested_2, category=case.category_nested_2, publish_from=publish_from,)
+    case.placement_nested_2.save()
