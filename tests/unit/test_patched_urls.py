@@ -29,13 +29,13 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
         self.assert_equals('http://nested-one.example.com/nested-nested-1/', reverse('category_detail', args=(self.category_nested_nested_1.tree_path,)))
 
     def test_url_tag_is_patched(self):
-        t = template.Template('{% url category_detail category.slug %}')
+        t = template.Template('{% url category_detail category.tree_path %}')
 
         var = {'category' : self.category_nested_1,}
         self.assert_equals('http://nested-one.example.com/', t.render(template.Context(var)))
 
     def test_url_tag_works_for_second_level_categories(self):
-        t = template.Template('{% url category_detail category.slug %}')
+        t = template.Template('{% url category_detail category.tree_path %}')
 
         var = {'category' : self.category_nested_nested_1,}
         self.assert_equals('http://nested-one.example.com/nested-nested-1/', t.render(template.Context(var)))
