@@ -1,12 +1,17 @@
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+
 from ella.core.models import Category
+from ella.core.models import Author
+from ella.articles.models import Article
 from ella_category_subdomain.models import CategorySubdomain
 
 def create_categories(case):
     case.site = Site.objects.create(name = "example.com", domain="example.com")
     case.site.save()
 
-    case.root_category = Category.objects.create(title='Root', slug='root', tree_parent=None, site=case.site)
+    case.root_category = Category.objects.create(title='Root', slug='root_homepage', tree_parent=None, site=case.site)
     case.root_category.save()
 
     case.category_nested_1 = Category.objects.create(title='Nested 1', slug='nested-1', tree_parent=case.root_category, site=case.site)
@@ -23,4 +28,25 @@ def create_categories(case):
 
     case.category_subdomain_nested_1 = CategorySubdomain.objects.create(category=case.category_nested_1, subdomain_slug='nested-one')
     case.category_subdomain_nested_1.save()
+
+    content_type = ContentType.objects.get_for_model(Article)
+    content_type.save()
+
+    author = Author.objects.create(name='User', slug='user')
+    author.save()
+
+    case.article_root = Article(content_type=content_type, category=case.root_category, title='Root Article', slug='root-article',)
+    case.article_root.save()
+    case.article_root.authors.add(author)
+    case.article_root.save()
+
+    case.article_nested_1 = Article(content_type=content_type, category=case.category_nested_1, title='Nested 1 Article', slug='nested-1-article',)
+    case.article_nested_1.save()
+    case.article_nested_1.authors.add(author)
+    case.article_nested_1.save()
+
+    case.article_nested_nested_1 = Article(content_type=content_type, category=case.category_nested_nested_1, title='Nested Nested 1 Article', slug='nested-nested-1-article',)
+    case.article_nested_nested_1.save()
+    case.article_nested_nested_1.authors.add(author)
+    case.article_nested_nested_1.save()
 
