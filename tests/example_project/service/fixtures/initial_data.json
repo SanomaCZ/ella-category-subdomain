@@ -3,8 +3,8 @@
         "pk": 1,
         "model": "sites.site",
         "fields": {
-            "domain": "example.localhost",
-            "name": "example.localhost"
+            "domain": "www.example.localhost",
+            "name": "www.example.localhost"
         }
     },
     {
