@@ -14,32 +14,40 @@ from ella_category_subdomain.urlresolvers import CategorySubdomainURLResolver
 from ella.core.models.main import Category
 
 
-def get_url_with_subdomain(parsed_url, category_subdomain):
-    # We will need mutable version of parsed_url.
-    parsed_url_list = list(parsed_url)
-    subdomain_slug = category_subdomain.subdomain_slug
-    category_path = category_subdomain.category.tree_path
+def get_domain(strip_www=True):
+    domain = Site.objects.get(pk=settings.SITE_ID).domain
+    return domain[4:] if domain.startswith('www.') and strip_www else domain
+
+
+def update_parsed_url_list(parsed_url_list):
     # If parsed_url has scheme attribute then preserve it,
     # else default to http.
-    new_scheme = parsed_url.scheme or 'http'
-    # Strip category tree path (plus slash at the beginning).
-    new_path = parsed_url.path[len(category_path)+1:]
-    # Get lowest level domain for given category.
-    new_netloc = category_subdomain.category.site.domain
-
-    # If domain starts with 'www.' then replace it with subdomain slug,
-    if new_netloc.startswith('www.'):
-        new_netloc = new_netloc.replace('www.', subdomain_slug)
-    else: # otherwise just prepend subdomain.
-        new_netloc = '%s.%s' % (subdomain_slug, new_netloc)
+    parsed_url_list[0] = parsed_url_list[0] or 'http'
 
     # Append defined server port if debugging.
     if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
-        new_netloc += ':%s' % settings.DEVELOPMENT_SERVER_PORT
+        parsed_url_list[1] += ':%s' % settings.DEVELOPMENT_SERVER_PORT
+
+
+def get_url_with_subdomain(parsed_url, category_subdomain):
+    # We will need mutable version of parsed_url.
+    parsed_url_list = list(parsed_url)
+
+    subdomain_slug = category_subdomain.subdomain_slug
+    category_path = category_subdomain.category.tree_path
+
+    # Strip category tree path (plus slash at the beginning).
+    new_path = parsed_url.path[len(category_path)+1:]
+
+    # Get subdomain for given category.
+    domain = '%s.%s' % (subdomain_slug, get_domain(strip_www=True))
+    logging.warning("domain = %r" % domain)
+
 
     # Change parsed_url_list.
-    parsed_url_list[:3] = new_scheme, new_netloc, new_path
-    logging.warning("parsed_url_list = %r" % parsed_url_list)
+    parsed_url_list[1:3] = domain, new_path
+    update_parsed_url_list(parsed_url_list)
+    logging.warning("changed parsed_url_list = %r" % parsed_url_list)
 
     # Construct and return new url.
     return urlunparse(parsed_url_list)
@@ -52,19 +60,8 @@ def get_url_without_subdomain(parsed_url):
     # We will need mutable version of parsed_url.
     parsed_url_list = list(parsed_url)
 
-    # Get all_sites domains.
-    # FIXME: It desperately requires another approach.
-    all_domains = [x.domain for x in Site.objects.all()]
-
-    for i in range(2, len(parts)):
-        # Construct domains up from the second level
-        domain = '.'.join(parts[-i:])
-        # and if one of them is in all_domains,
-        if domain in all_domains:
-            # pick this domain.
-            parsed_url_list[1] = domain
-            break
-        # FIXME: What if domain of higher level is registered Site?
+    parsed_url_list[1] = get_domain(strip_www=False)
+    update_parsed_url_list(parsed_url_list)
 
     # Construct and return new url.
     return urlunparse(parsed_url_list)
@@ -80,6 +77,7 @@ def patch_reverse(reverse):
         # If a path of the original Django reverse starts with tree_path
         # of a category with subdomain, add the appropriate CategorySubdomain
         # to category_subdomain_list.
+        # FIXME: It desperately requires another approach.
         category_subdomain_list = [x for x in CategorySubdomain.objects.all()
               if parsed_url.path.startswith('/%s/' % x.category.tree_path)]
         logging.warning("category_subdomain_list = %r\n" % (parsed_url,))
@@ -105,16 +103,9 @@ def patch_reverse(reverse):
 def do_monkeypatch():
     # Replace django.core.urlresolvers.reverse and do it only once.
     if not hasattr(urlresolvers.reverse, '_original_reverse'):
-        logging.warning("Doing monkeypatch!")
+        logging.warning("Doing django.core.urlresolvers.reverse monkeypatch!")
         urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
     # Replace ella.core.models.main.Category.get_absolute_url
     if not hasattr(Category.get_absolute_url, '_original_reverse'):
-        logging.warning("Doing monkeypatch!")
+        logging.warning("Doing Category.get_absolute_url monkeypatch!")
         Category.get_absolute_url = patch_reverse(Category.get_absolute_url)
-
-
-def undo_monkeypatch():
-    # Revert patch to original.
-    if hasattr(urlresovers.reverse, '_original_reverse'):
-        logging.warning("Undoing monkeypatch!")
-        urlresolver.reverse = urlresolver.reverse.original_reverse
