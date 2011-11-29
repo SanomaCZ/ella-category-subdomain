@@ -27,8 +27,8 @@ class TestModelCase(DatabaseTestCase):
         self.assert_raises(ValidationError, cs.clean)
 
     def test_category_can_be_referenced_by_only_one_subdomain(self):
-        cs1 = CategorySubdomain(category = self.category_nested_1, subdomain_slug = self.category_nested_1.slug)
+        cs1 = CategorySubdomain(category = self.category_nested_2, subdomain_slug = self.category_nested_2.slug)
         cs1.save()
-        cs2 = CategorySubdomain(category = self.category_nested_1, subdomain_slug = self.category_nested_1.slug)
+        cs2 = CategorySubdomain(category = self.category_nested_2, subdomain_slug = self.category_nested_2.slug)
         self.assert_raises(IntegrityError, cs2.save)
 

@@ -3,7 +3,7 @@ from ella.core.models import Category
 from ella_category_subdomain.models import CategorySubdomain
 
 def create_categories(case):
-    case.site = Site.objects.get_current()
+    case.site = Site.objects.create(name = "example.com", domain="example.com")
     case.site.save()
 
     case.root_category = Category.objects.create(title='Root', slug='root', tree_parent=None, site=case.site)
@@ -20,3 +20,7 @@ def create_categories(case):
 
     case.category_nested_nested_2 = Category.objects.create(title='Nested Nested 2', slug='nested-nested-2', tree_parent=case.category_nested_2, site=case.site)
     case.category_nested_nested_2.save()
+
+    case.category_subdomain_nested_1 = CategorySubdomain.objects.create(category=case.category_nested_1, subdomain_slug='nested-one')
+    case.category_subdomain_nested_1.save()
+

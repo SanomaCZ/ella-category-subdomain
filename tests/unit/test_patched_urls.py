@@ -22,10 +22,10 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
         self.assert_equals('http://nested-1.example.com/nested-nested-1/', self.category_nested_nested_1.get_absolute_url())
 
     def test_category_reverse_is_patched(self):
-        self.assert_equals('http://nested-1.example.com/', reverse('category_detail', args=(self.category_nested_1.slug,)))
+        self.assert_equals('http://nested-1.example.com/', reverse('category_detail', args=(self.category_nested_1.tree_path,)))
 
     def test_category_reverse_works_for_second_level_categories(self):
-        self.assert_equals('http://nested-1.example.com/nested-nested-1/', reverse('category_detail', args=(self.category_nested_nested_1.slug,)))
+        self.assert_equals('http://nested-1.example.com/nested-nested-1/', reverse('category_detail', args=(self.category_nested_nested_1.tree_path,)))
 
     def test_url_tag_is_patched(self):
         t = template.Template('{% url category_detail category.slug %}')
