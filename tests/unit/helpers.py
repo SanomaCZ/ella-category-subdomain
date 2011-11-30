@@ -11,23 +11,24 @@ from ella.core.models import Placement
 from ella.articles.models import Article
 from ella_category_subdomain.models import CategorySubdomain
 
-def create_categories(case):
-    case.site = Site.objects.create(name = "example.com", domain="example.com")
-    case.site.save()
+def create_categories_site(case):
+    case.site_1 = Site.objects.create(name="example.com", domain="example.com")
+    case.site_1.save()
+    case.site_1_id = case.site_1.id
 
-    case.category_root = Category.objects.create(title='Root', slug='root_homepage', tree_parent=None, site=case.site)
+    case.category_root = Category.objects.create(title='Root', slug='root_homepage', tree_parent=None, site=case.site_1)
     case.category_root.save()
 
-    case.category_nested_1 = Category.objects.create(title='Nested 1', slug='nested-1', tree_parent=case.category_root, site=case.site)
+    case.category_nested_1 = Category.objects.create(title='Nested 1', slug='nested-1', tree_parent=case.category_root, site=case.site_1)
     case.category_nested_1.save()
 
-    case.category_nested_2 = Category.objects.create(title='Nested 2', slug='nested-2', tree_parent=case.category_root, site=case.site)
+    case.category_nested_2 = Category.objects.create(title='Nested 2', slug='nested-2', tree_parent=case.category_root, site=case.site_1)
     case.category_nested_2.save()
 
-    case.category_nested_nested_1 = Category.objects.create(title='Nested Nested 1', slug='nested-nested-1', tree_parent=case.category_nested_1, site=case.site)
+    case.category_nested_nested_1 = Category.objects.create(title='Nested Nested 1', slug='nested-nested-1', tree_parent=case.category_nested_1, site=case.site_1)
     case.category_nested_nested_1.save()
 
-    case.category_nested_nested_2 = Category.objects.create(title='Nested Nested 2', slug='nested-nested-2', tree_parent=case.category_nested_2, site=case.site)
+    case.category_nested_nested_2 = Category.objects.create(title='Nested Nested 2', slug='nested-nested-2', tree_parent=case.category_nested_2, site=case.site_1)
     case.category_nested_nested_2.save()
 
     case.category_subdomain_nested_1 = CategorySubdomain.objects.create(category=case.category_nested_1, subdomain_slug='nested-one')
@@ -72,3 +73,43 @@ def create_categories(case):
 
     case.placement_nested_nested_2 = Placement.objects.create(publishable=case.article_nested_nested_2, category=case.category_nested_nested_2, publish_from=publish_from,)
     case.placement_nested_nested_2.save()
+
+    case.site_2 = Site.objects.create(name="example1.com", domain="example1.com")
+    case.site_2.save()
+    case.site_2_id = case.site_2.id
+
+    case.site_2_root = Category.objects.create(title='Root', slug='root', tree_parent=None, site=case.site_2)
+    case.site_2_root.save()
+
+    case.site_2_nested_1 = Category.objects.create(title='Nested 1', slug='nested-1', tree_parent=case.site_2_root, site=case.site_2)
+    case.site_2_nested_1.save()
+
+    case.site_2_nested_2 = Category.objects.create(title='Nested 2', slug='nested-2', tree_parent=case.site_2_root, site=case.site_2)
+    case.site_2_nested_2.save()
+
+
+    case.site_3 = Site.objects.create(name="www.example.com", domain="www.example.com")
+    case.site_3.save()
+    case.site_3_id = case.site_3.id
+
+    case.site_3_root = Category.objects.create(title='Root', slug='root', tree_parent=None, site=case.site_3)
+    case.site_3_root.save()
+
+    case.site_3_nested_1 = Category.objects.create(title='Nested 1', slug='nested-1', tree_parent=case.site_3_root, site=case.site_3)
+    case.site_3_nested_1.save()
+
+    case.site_3_nested_2 = Category.objects.create(title='Nested 2', slug='nested-2', tree_parent=case.site_3_root, site=case.site_3)
+    case.site_3_nested_2.save()
+
+    case.site_4 = Site.objects.create(name="www.example.co.uk", domain="www.example.co.uk")
+    case.site_4.save()
+    case.site_4_id = case.site_4.id
+
+    case.site_4_root = Category.objects.create(title='Root', slug='root', tree_parent=None, site=case.site_4)
+    case.site_4_root.save()
+
+    case.site_4_nested_1 = Category.objects.create(title='Nested 1', slug='nested-1', tree_parent=case.site_4_root, site=case.site_4)
+    case.site_4_nested_1.save()
+
+    case.site_4_nested_2 = Category.objects.create(title='Nested 2', slug='nested-2', tree_parent=case.site_4_root, site=case.site_4)
+    case.site_4_nested_2.save()
