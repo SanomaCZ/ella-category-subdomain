@@ -115,3 +115,21 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
 
         var = {'category' : self.category_nested_nested_2.tree_path, 'content_type': 'articles', 'slug': self.placement_nested_2.slug, 'year': 2011, 'month': 11, 'day': 1}
         self.assert_equals('http://example.com/nested-2/nested-nested-2/2011/11/1/articles/nested-2-article/', t.render(template.Context(var)))
+
+    # site 2 tests
+
+    def test_site_2_root_category_get_absolute_url_works(self):
+        self.assert_equals('http://example1.com/', self.category_root.get_absolute_url())
+
+    def test_site_2_category_get_absolute_url_is_patched(self):
+        self.assert_equals('http://nested-one.example1.com/', self.site_2_nested_1.get_absolute_url())
+
+    def test_category_reverse_is_patched(self):
+        from django.core.urlresolvers import reverse
+        self.assert_equals('http://nested-one.example1.com/', reverse('category_detail', args=(self.site_2_nested_1.tree_path,)))
+
+    def test_site_2_url_tag_is_patched(self):
+        t = template.Template('{% url category_detail category.tree_path %}')
+
+        var = {'category' : self.site_2_nested_1,}
+        self.assert_equals('http://nested-one.example1.com/', t.render(template.Context(var)))
