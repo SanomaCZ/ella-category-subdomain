@@ -12,18 +12,23 @@ class CategorySubdomain(models.Model):
     def __unicode__(self):
         return self.subdomain_slug
 
-    #def get_absolute_url(self):
-    #    domain = self.category.site.domain
-    #    # FIXME: ugly
-    #    if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
-    #        port = ':%s' % settings.DEVELOPMENT_SERVER_PORT
-    #    else:
-    #        port = ''
-    #    if domain.startswith('www.'):
-    #        subdomain = domain.replace('www', self.subdomain_slug)
-    #        return "http://%s%s/" % (subdomain, port)
-    #    else:
-    #        return "http://%s.%s%s/" % (self.subdomain_slug, domain, port)
+    def get_site_domain(self):
+        """Get site domain without leading www."""
+        domain = self.category.site.domain
+        return domain[4:] if domain.startswith('www.') else domain
+
+    def get_subdomain(self):
+        return '%s.%s' % (self.subdomain_slug, self.get_site_domain())
+
+    def get_absolute_url(self):
+        return "http://%s%s/" % (self.get_subdomain(), port)
+
+    @staticmethod
+    def _development_server_port():
+        if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
+            return ':%s' % settings.DEVELOPMENT_SERVER_PORT
+        else:
+            return ''
 
     def clean(self):
         """Validates that only first level category is referenced by the CategorySubdomain

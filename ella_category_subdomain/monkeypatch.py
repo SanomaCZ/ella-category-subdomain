@@ -14,8 +14,12 @@ from ella_category_subdomain.urlresolvers import CategorySubdomainURLResolver
 from ella.core.models.main import Category
 
 
-def get_domain(strip_www=False):
+# FIXME: Maybe should be defined somewhere else.
+def get_domain(strip_www=False, with_development_server_port=True):
+    """Return site domain with development server port (if DEBUG)."""
     domain = Site.objects.get(pk=settings.SITE_ID).domain
+    if with_development_server_port:
+        domain += CategorySubdomain._development_server_port()
     return domain[4:] if domain.startswith('www.') and strip_www else domain
 
 
@@ -24,9 +28,9 @@ def update_parsed_url_list(parsed_url_list):
     # else default to http.
     parsed_url_list[0] = parsed_url_list[0] or 'http'
 
-    # Append defined server port if debugging.
-    if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
-        parsed_url_list[1] += ':%s' % settings.DEVELOPMENT_SERVER_PORT
+    # # Append defined server port if debugging.
+    # if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
+    #     parsed_url_list[1] += ':%s' % settings.DEVELOPMENT_SERVER_PORT
 
 
 def get_url_with_subdomain(parsed_url, category_subdomain):

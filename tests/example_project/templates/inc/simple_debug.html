@@ -1,13 +1,19 @@
 <p style="font-weight: bold">Simple debug</p>
-<p>Categories: {% for cat in categories %}
-<br />
-<a href="http://{{ request.get_host }}/{{ cat.tree_path }}/">{{ cat.get_absolute_url }}</a>,
+<table>
+<tr><th>Old location</th><th>New location</th></tr>
+{% for cat in categories %}
+<tr>
 {% if cat.tree_path %}
-<a href="{% url category_detail cat.tree_path %}">{{ cat.get_absolute_url }}</a>,
+<td><a href="http://{{ domain }}:{{ port }}/{{ cat.tree_path }}/">http://{{ domain }}:{{ port }}/{{ cat.tree_path }}/</a></td>
+<td><a href="{% url category_detail cat.tree_path %}">{% url category_detail cat.tree_path %}</a></td>
 {% else %}
-<a href="{% url root_homepage %}">{{ cat }}</a>,
+<td><a href="http://{{ domain }}:{{ port }}/">http://{{ domain }}:{{ port }}</a></td>
+<td><a href="{% url root_homepage %}">{% url root_homepage %}</a></td>
 {% endif %}
-{% endfor %}</p>
+</tr>
+{% endfor %}
+</table>
+</p>
 <p>request.get_host() = {{ request.get_host }}</p>
 <p>request.path = {{ request.path }}</p>
 <p>request.path_info = {{ request.path_info }}</p>
