@@ -15,7 +15,7 @@ class TestModelCase(DatabaseTestCase):
         create_categories(self)
 
     def test_root_category_cannot_be_user_for_subdomain(self):
-        cs = CategorySubdomain(category = self.root_category, subdomain_slug = self.root_category.slug)
+        cs = CategorySubdomain(category = self.category_root, subdomain_slug = self.category_root.slug)
         self.assert_raises(ValidationError, cs.clean)
 
     def test_first_level_category_validates_for_subdomain(self):

@@ -15,13 +15,13 @@ def create_categories(case):
     case.site = Site.objects.create(name = "example.com", domain="example.com")
     case.site.save()
 
-    case.root_category = Category.objects.create(title='Root', slug='root_homepage', tree_parent=None, site=case.site)
-    case.root_category.save()
+    case.category_root = Category.objects.create(title='Root', slug='root_homepage', tree_parent=None, site=case.site)
+    case.category_root.save()
 
-    case.category_nested_1 = Category.objects.create(title='Nested 1', slug='nested-1', tree_parent=case.root_category, site=case.site)
+    case.category_nested_1 = Category.objects.create(title='Nested 1', slug='nested-1', tree_parent=case.category_root, site=case.site)
     case.category_nested_1.save()
 
-    case.category_nested_2 = Category.objects.create(title='Nested 2', slug='nested-2', tree_parent=case.root_category, site=case.site)
+    case.category_nested_2 = Category.objects.create(title='Nested 2', slug='nested-2', tree_parent=case.category_root, site=case.site)
     case.category_nested_2.save()
 
     case.category_nested_nested_1 = Category.objects.create(title='Nested Nested 1', slug='nested-nested-1', tree_parent=case.category_nested_1, site=case.site)
@@ -38,11 +38,11 @@ def create_categories(case):
     author = Author.objects.create(name='User', slug='user')
     author.save()
 
-    case.article_root = Article(category=case.root_category, title='Root Article', slug='root-article',)
+    case.article_root = Article(category=case.category_root, title='Root Article', slug='root-article',)
     case.article_root.save()
     case.article_root.authors.add(author)
 
-    case.placement_root = Placement.objects.create(publishable=case.article_root, category=case.root_category, publish_from=publish_from,)
+    case.placement_root = Placement.objects.create(publishable=case.article_root, category=case.category_root, publish_from=publish_from,)
     case.placement_root.save()
 
     case.article_nested_1 = Article(category=case.category_nested_1, title='Nested 1 Article', slug='nested-1-article',)
@@ -56,9 +56,19 @@ def create_categories(case):
     case.article_nested_nested_1.save()
     case.article_nested_nested_1.authors.add(author)
 
+    case.placement_nested_nested_1 = Placement.objects.create(publishable=case.article_nested_nested_1, category=case.category_nested_nested_1, publish_from=publish_from,)
+    case.placement_nested_nested_1.save()
+
     case.article_nested_2 = Article(category=case.category_nested_2, title='Nested 2 Article', slug='nested-2-article',)
     case.article_nested_2.save()
     case.article_nested_2.authors.add(author)
 
     case.placement_nested_2 = Placement.objects.create(publishable=case.article_nested_2, category=case.category_nested_2, publish_from=publish_from,)
     case.placement_nested_2.save()
+
+    case.article_nested_nested_2 = Article(category=case.category_nested_nested_2, title='Nested 2 Article', slug='nested-2-article',)
+    case.article_nested_nested_2.save()
+    case.article_nested_nested_2.authors.add(author)
+
+    case.placement_nested_nested_2 = Placement.objects.create(publishable=case.article_nested_nested_2, category=case.category_nested_nested_2, publish_from=publish_from,)
+    case.placement_nested_nested_2.save()
