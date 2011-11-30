@@ -6,13 +6,13 @@ from djangosanetesting import DatabaseTestCase
 from ella.core.models import Category
 from ella_category_subdomain.models import CategorySubdomain
 
-from unit.helpers import create_categories
+from unit.helpers import create_categories_site
 
 class TestModelCase(DatabaseTestCase):
 
     def setUp(self):
         super(TestModelCase, self).setUp()
-        create_categories(self)
+        create_categories_site(self)
 
     def test_root_category_cannot_be_user_for_subdomain(self):
         cs = CategorySubdomain(category = self.category_root, subdomain_slug = self.category_root.slug)

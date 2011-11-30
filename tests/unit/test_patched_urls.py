@@ -1,13 +1,14 @@
+from django.conf import settings
 from django import template
 from djangosanetesting import DatabaseTestCase
 
-from unit.helpers import create_categories
+from unit.helpers import create_categories_site
 
 class TestAbsoluteURLsCase(DatabaseTestCase):
 
     def setUp(self):
         super(TestAbsoluteURLsCase, self).setUp()
-        create_categories(self)
+        create_categories_site(self)
 
     # get_absolute_url testes
 
@@ -117,6 +118,12 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
         self.assert_equals('http://example.com/nested-2/nested-nested-2/2011/11/1/articles/nested-2-article/', t.render(template.Context(var)))
 
     # site 2 tests
+class TestAbsoluteURLsSite2Case(DatabaseTestCase):
+
+    def setUp(self):
+        super(TestAbsoluteURLsSite2Case, self).setUp()
+        create_categories_site(self)
+        settings.SITE_ID = self.site_2_id
 
     def test_site_2_root_category_get_absolute_url_works(self):
         self.assert_equals('http://example1.com/', self.category_root.get_absolute_url())
@@ -133,3 +140,51 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
 
         var = {'category' : self.site_2_nested_1,}
         self.assert_equals('http://nested-one.example1.com/', t.render(template.Context(var)))
+
+
+class TestAbsoluteURLsSite3Case(DatabaseTestCase):
+
+    def setUp(self):
+        super(TestAbsoluteURLsSite3Case, self).setUp()
+        create_categories_site(self)
+        settings.SITE_ID = self.site_3_id
+
+    def test_site_3_root_category_get_absolute_url_works(self):
+        self.assert_equals('http://www.example.com/', self.category_root.get_absolute_url())
+
+    def test_site_3_category_get_absolute_url_is_patched(self):
+        self.assert_equals('http://nested-one.example.com/', self.site_2_nested_1.get_absolute_url())
+
+    def test_category_reverse_is_patched(self):
+        from django.core.urlresolvers import reverse
+        self.assert_equals('http://nested-one.example.com/', reverse('category_detail', args=(self.site_2_nested_1.tree_path,)))
+
+    def test_site_3_url_tag_is_patched(self):
+        t = template.Template('{% url category_detail category.tree_path %}')
+
+        var = {'category' : self.site_2_nested_1,}
+        self.assert_equals('http://nested-one.example.com/', t.render(template.Context(var)))
+
+
+class TestAbsoluteURLsSite4Case(DatabaseTestCase):
+
+    def setUp(self):
+        super(TestAbsoluteURLsSite4Case, self).setUp()
+        create_categories_site(self)
+        settings.SITE_ID = self.site_4_id
+
+    def test_site_4_root_category_get_absolute_url_works(self):
+        self.assert_equals('http://www.example.co.uk/', self.category_root.get_absolute_url())
+
+    def test_site_4_category_get_absolute_url_is_patched(self):
+        self.assert_equals('http://nested-one.example.co.uk/', self.site_2_nested_1.get_absolute_url())
+
+    def test_category_reverse_is_patched(self):
+        from django.core.urlresolvers import reverse
+        self.assert_equals('http://nested-one.example.co.uk/', reverse('category_detail', args=(self.site_2_nested_1.tree_path,)))
+
+    def test_site_4_url_tag_is_patched(self):
+        t = template.Template('{% url category_detail category.tree_path %}')
+
+        var = {'category' : self.site_2_nested_1,}
+        self.assert_equals('http://nested-one.example.co.uk/', t.render(template.Context(var)))
