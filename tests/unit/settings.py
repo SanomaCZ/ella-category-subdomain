@@ -29,8 +29,8 @@ ADMIN_MEDIA_PREFIX = '/admin_media/'
 
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
     'ella_category_subdomain.middleware.CategorySubdomainMiddleware',
+    'django.middleware.common.CommonMiddleware',
 )
 
 ROOT_URLCONF = 'unit.urls'
@@ -44,13 +44,13 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'ella_category_subdomain',
     'django.contrib.contenttypes',
     'django.contrib.sites',
 
     'ella.core',
     'ella.articles',
     'ella.photos',
-    'ella_category_subdomain',
 )
 
 
