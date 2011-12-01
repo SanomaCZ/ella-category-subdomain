@@ -17,9 +17,7 @@ from .monkeypatch import do_monkeypatch, get_domain, get_url
 class CategorySubdomainMiddleware:
 
     def __init__(self):
-        # FIXME: Monkeypatch needs to be triggered in better place.
-        do_monkeypatch()
-        self.static_prefixes = [settings.MEDIA_URL]
+        self.static_prefixes = [settings.MEDIA_URL,]
 
     def process_request(self, request):
         # FIXME: Permanent redirect from old url.
@@ -31,15 +29,19 @@ class CategorySubdomainMiddleware:
 
     def _get_category_subdomain_for_host(self, host):
         domain_parts = host.split('.')
+
+        result = None
+
         if (len(domain_parts) > 2):
             subdomain = domain_parts[0].lower()
 
             try:
                 cs = CategorySubdomain.objects.get(subdomain_slug=subdomain)
                 if cs.category.site.pk == settings.SITE_ID:
-                    return cs
+                    result = cs
             except CategorySubdomain.DoesNotExist:
                 pass
+        return result
 
     def _get_category_subdomain_for_path(self, path):
         tree_path = path.lstrip('/').split('/')[0]
