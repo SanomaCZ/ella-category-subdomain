@@ -1,5 +1,6 @@
 from urlparse import urlparse, urlunparse
 
+# JS: nepouzity import
 import logging
 
 from django.conf import settings
@@ -7,8 +8,10 @@ from django.contrib.sites.models import Site
 import django.conf.urls.defaults
 import django.core.urlresolvers as urlresolvers
 
+# JS: import s teckou. Importy z projektu by mely byt az posledni
 from .models import CategorySubdomain
 
+# JS: nepouzite importy. Vim ze jsou jeste po me :)
 from ella_category_subdomain.urlresolvers import CategorySubdomainURLPattern
 from ella_category_subdomain.urlresolvers import CategorySubdomainURLResolver
 from ella.core.models.main import Category
@@ -21,10 +24,13 @@ def get_domain(strip_www=False, with_development_server_port=True):
     domain = Site.objects.get(pk=settings.SITE_ID).domain
     if with_development_server_port:
         domain += CategorySubdomain._development_server_port()
+    # JS: viz models.py
     return domain[4:] if domain.startswith('www.') and strip_www else domain
 
 
 def update_parsed_url_list(parsed_url_list):
+    # JS: tenhle nazev metody vubec nerika, co to dela
+    # JS: mozna je i malicko zbytecna
     # If parsed_url has scheme attribute then preserve it,
     # else default to http.
     parsed_url_list[0] = parsed_url_list[0] or 'http'

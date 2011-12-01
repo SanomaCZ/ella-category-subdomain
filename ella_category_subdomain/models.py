@@ -15,6 +15,7 @@ class CategorySubdomain(models.Model):
     def get_site_domain(self):
         """Get site domain without leading www."""
         domain = self.category.site.domain
+        #JS: ta konstanta tam je divna, dal bych si to 'www.' do promene a pak do tech hranatych zavovek domain[len(www):] aby se to upravovalo na jednom miste
         return domain[4:] if domain.startswith('www.') else domain
 
     def get_subdomain(self):
@@ -23,6 +24,7 @@ class CategorySubdomain(models.Model):
     def get_absolute_url(self):
         return "http://%s%s/" % (self.get_subdomain(), port)
 
+    # JS: tohle fakt jinam
     @staticmethod
     def _development_server_port():
         if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
