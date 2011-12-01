@@ -12,6 +12,7 @@ from .models import CategorySubdomain
 from ella_category_subdomain.urlresolvers import CategorySubdomainURLPattern
 from ella_category_subdomain.urlresolvers import CategorySubdomainURLResolver
 from ella.core.models.main import Category
+from ella.core.models.publishable import Publishable
 
 
 def get_domain(strip_www=False):
@@ -104,3 +105,6 @@ def do_monkeypatch():
     # Replace ella.core.models.main.Category.get_absolute_url
     if not hasattr(Category.get_absolute_url, '_original_reverse'):
         Category.get_absolute_url = patch_reverse(Category.get_absolute_url)
+    # Replace ella.core.models.publishable.Publishable.get_absolute_url
+    if not hasattr(Publishable.get_absolute_url, '_original_reverse'):
+        Publishable.get_absolute_url = patch_reverse(Publishable.get_absolute_url)

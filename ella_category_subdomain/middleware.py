@@ -16,8 +16,7 @@ from .monkeypatch import do_monkeypatch
 class CategorySubdomainMiddleware:
 
     def __init__(self):
-        self.static_prefixes = [settings.MEDIA_URL]
-        do_monkeypatch()
+        self.static_prefixes = [settings.MEDIA_URL,]
 
     def process_request(self, request):
         # FIXME: Permanent redirect from old url.
@@ -28,25 +27,30 @@ class CategorySubdomainMiddleware:
     def _get_category_subdomain(self, host):
         logging.warning("Getting CategorySubdomain for host %r" % host)
         domain_parts = host.split('.')
+
+        result = None
+
         if (len(domain_parts) > 2):
             subdomain = domain_parts[0].lower()
 
             try:
                 cs = CategorySubdomain.objects.get(subdomain_slug=subdomain)
                 if cs.category.site.pk == settings.SITE_ID:
-                    return cs
+                    result = cs
             except CategorySubdomain.DoesNotExist:
-                return None
+                pass
 
-        return None
+        return result
 
     def _translate_path(self, host, path):
         for prefix in self.static_prefixes:
             if path.startswith(prefix):
                 return path
+
+        new_path = path
+
         cs = self._get_category_subdomain(host)
         if cs is not None:
             new_path = '/%s%s' % (cs.category.path, path)
-        else:
-            new_path = path
+
         return new_path

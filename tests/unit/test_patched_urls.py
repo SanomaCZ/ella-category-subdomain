@@ -84,10 +84,10 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
     # article tests
 
     def test_root_article_get_absolute_urls_works_unaffected(self):
-        self.assert_equals('http://example.com/', self.article_root.get_absolute_url())
+        self.assert_equals('http://example.com/2011/9/1/articles/root-article/', self.article_root.get_absolute_url())
 
     def test_first_level_article_get_absolute_url_is_patched(self):
-        self.assert_equals('http://nested-one.example.com/', self.article_nested_1.get_absolute_url())
+        self.assert_equals('http://nested-one.example.com/2011/9/1/articles/nested-1-article/', self.article_nested_1.get_absolute_url())
 
     def test_root_article_url_tag_work_unaffected(self):
         t = template.Template('{% url object_detail category year month day content_type slug %}')
@@ -98,14 +98,14 @@ class TestAbsoluteURLsCase(DatabaseTestCase):
     def test_url_tag_works_first_level_article(self):
         t = template.Template('{% url object_detail category year month day content_type slug %}')
 
-        var = {'category' : '/', 'content_type': 'articles', 'slug': self.placement_nested_1.slug, 'year': 2011, 'month': 11, 'day': 1}
+        var = {'category' : self.category_nested_1.tree_path, 'content_type': 'articles', 'slug': self.placement_nested_1.slug, 'year': 2011, 'month': 11, 'day': 1}
         self.assert_equals('http://nested-one.example.com/2011/11/1/articles/nested-1-article/', t.render(template.Context(var)))
 
     def test_url_tag_works_second_level_article(self):
         t = template.Template('{% url object_detail category year month day content_type slug %}')
 
-        var = {'category' : '/', 'content_type': 'articles', 'slug': self.placement_nested_nested_1.slug, 'year': 2011, 'month': 11, 'day': 1}
-        self.assert_equals('http://nested-one.example.com/nested-nested-1/2011/11/1/articles/nested-1-article/', t.render(template.Context(var)))
+        var = {'category' : self.category_nested_nested_1.tree_path, 'content_type': 'articles', 'slug': self.placement_nested_nested_1.slug, 'year': 2011, 'month': 11, 'day': 1}
+        self.assert_equals('http://nested-one.example.com/nested-nested-1/2011/11/1/articles/nested-nested-1-article/', t.render(template.Context(var)))
 
     def test_no_subdomain_article_url_tag_work_unaffected(self):
         t = template.Template('{% url object_detail category year month day content_type slug %}')
