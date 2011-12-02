@@ -5,17 +5,21 @@ import logging
 
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.db.models import get_models
+#from django.db.models.base import ModelBase
+#from django.db.models.loading import cache
 import django.conf.urls.defaults
 import django.core.urlresolvers as urlresolvers
+from django.utils.functional import update_wrapper
 
 # JS: import s teckou. Importy z projektu by mely byt az posledni
 from .models import CategorySubdomain
 
-# JS: nepouzite importy. Vim ze jsou jeste po me :)
-from ella_category_subdomain.urlresolvers import CategorySubdomainURLPattern
-from ella_category_subdomain.urlresolvers import CategorySubdomainURLResolver
 from ella.core.models.main import Category
 from ella.core.models.publishable import Publishable
+
+
+
 
 
 # FIXME: Maybe should be defined somewhere else.
@@ -55,6 +59,7 @@ def get_url_with_subdomain(parsed_url, category_subdomain):
 
     # Change parsed_url_list.
     parsed_url_list[1:3] = domain, new_path
+
     update_parsed_url_list(parsed_url_list)
 
     # Construct and return new url.
@@ -78,26 +83,33 @@ def get_url(url):
     # Parse url.
     parsed_url = urlparse(url)
 
-    # If a path of the original Django reverse starts with tree_path
-    # of a category with subdomain, add the appropriate CategorySubdomain
-    # to category_subdomain_list.
-    # FIXME: It desperately requires another approach.
-    category_subdomain_list = [x for x in CategorySubdomain.objects.all()
-          if parsed_url.path.startswith('/%s/' % x.category.tree_path)]
+    # get non-empty URL path items
+    path_items = [item for item in parsed_url.path.split('/') if (len(item) > 0)]
+    # if the path is not a root one check if the first item of path does not match category
+    # subdomain and change the URL accordingly
+    if (len(path_items) > 0):
+        # get the first path item
+        first_path_item = path_items[0]
+        # search for the particular subdomain category
+        category_subdomain_list = CategorySubdomain.objects.filter(category__slug = first_path_item)
+        # change the URL if found
+        if (len(category_subdomain_list) == 1):
+             return get_url_with_subdomain(parsed_url, category_subdomain_list[0])
 
-    # If category_subdomain_list is empty, return url without sudomain (of
-    # the lowest possible level).
-    if not category_subdomain_list:
+    # get the URL domain parts
+    domain_items = parsed_url.netloc.split('.')
+    # get the first domain part
+    first_domain_item = domain_items[0]
+    # search for the particular subdomain category
+    category_subdomain_list = CategorySubdomain.objects.filter(subdomain_slug = first_domain_item)
+
+    # the URL already modified if exists
+    if (len(category_subdomain_list) > 0):
+        return url
+    # fill in the default subdomain otherwise
+    else:
         return get_url_without_subdomain(parsed_url)
 
-    # Now, category_subdomain_list should contain just one
-    # CategorySubdomain instance (because of model validation).
-    # Otherwise at least on of them would be double or more nested
-    # category.
-    assert len(category_subdomain_list) == 1, 'This should be always 1!'
-
-    # Finally, return url with correct subdomain and path.
-    return get_url_with_subdomain(parsed_url, category_subdomain_list[0])
 
 
 def patch_reverse(reverse):
@@ -112,9 +124,8 @@ def do_monkeypatch():
     # Replace django.core.urlresolvers.reverse and do it only once.
     if not hasattr(urlresolvers.reverse, '_original_reverse'):
         urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
-    # Replace ella.core.models.main.Category.get_absolute_url
-    if not hasattr(Category.get_absolute_url, '_original_reverse'):
-        Category.get_absolute_url = patch_reverse(Category.get_absolute_url)
-    # Replace ella.core.models.publishable.Publishable.get_absolute_url
-    if not hasattr(Publishable.get_absolute_url, '_original_reverse'):
-        Publishable.get_absolute_url = patch_reverse(Publishable.get_absolute_url)
+
+    # Replace get all the get_absolute_url methods in all the models
+    for model in get_models():
+        if hasattr(model, 'get_absolute_url'):
+            model.get_absolute_url = patch_reverse(model.get_absolute_url)
