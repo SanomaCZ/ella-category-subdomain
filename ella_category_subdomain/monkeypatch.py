@@ -18,10 +18,6 @@ from .models import CategorySubdomain
 from ella.core.models.main import Category
 from ella.core.models.publishable import Publishable
 
-
-
-
-
 # FIXME: Maybe should be defined somewhere else.
 def get_domain(strip_www=False, with_development_server_port=True):
     """Return site domain with development server port (if DEBUG)."""
@@ -45,6 +41,7 @@ def update_parsed_url_list(parsed_url_list):
 
 
 def get_url_with_subdomain(parsed_url, category_subdomain):
+    # JS: myslim, ze doporuceni je psat mala pismena a bez tecky na konci, pokud jde o jednu vetu
     # We will need mutable version of parsed_url.
     parsed_url_list = list(parsed_url)
 
@@ -80,7 +77,7 @@ def get_url_without_subdomain(parsed_url):
 
 
 def get_url(url):
-    # Parse url.
+    # parse url
     parsed_url = urlparse(url)
 
     # get non-empty URL path items
