@@ -4,22 +4,12 @@ from urlparse import urlparse, urlunparse
 import logging
 
 from django.conf import settings
-from django.contrib.sites.models import Site
-from django.db.models import get_models
-#from django.db.models.base import ModelBase
-#from django.db.models.loading import cache
-import django.conf.urls.defaults
-import django.core.urlresolvers as urlresolvers
-from django.utils.functional import update_wrapper
 
 # JS: import s teckou. Importy z projektu by mely byt az posledni
-from .models import CategorySubdomain
-
-from ella.core.models.main import Category
-from ella.core.models.publishable import Publishable
 
 # FIXME: Maybe should be defined somewhere else.
 def get_domain(strip_www=False, with_development_server_port=True):
+    from django.contrib.sites.models import Site
     """Return site domain with development server port (if DEBUG)."""
     domain = Site.objects.get(pk=settings.SITE_ID).domain
     if with_development_server_port:
@@ -77,6 +67,7 @@ def get_url_without_subdomain(parsed_url):
 
 
 def get_url(url):
+    from ella_category_subdomain.models import CategorySubdomain
     # parse url
     parsed_url = urlparse(url)
 
@@ -118,6 +109,10 @@ def patch_reverse(reverse):
 
 
 def do_monkeypatch():
+    from django.db.models import get_models
+    import django.conf.urls.defaults
+    import django.core.urlresolvers as urlresolvers
+
     # Replace django.core.urlresolvers.reverse and do it only once.
     if not hasattr(urlresolvers.reverse, '_original_reverse'):
         urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
