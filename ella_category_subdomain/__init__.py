@@ -8,7 +8,7 @@ import logging
 from django.conf import settings
 import django.core.urlresolvers as urlresolvers
 
-from ella_category_subdomain.monkeypatch import patch_reverse, patch_resolve
+from ella_category_subdomain.monkeypatch import patch_reverse
 
 patched = {}
 
@@ -27,4 +27,3 @@ for app in settings.INSTALLED_APPS:
                     member.get_absolute_url = patch_reverse(member.get_absolute_url)
 
 urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
-urlresolvers.resolve = patch_resolve(urlresolvers.resolve)
