@@ -1,9 +1,10 @@
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from ella.core.models import Category
+
+from ella_category_subdomain.util import get_domain_for_category
 
 class CategorySubdomain(models.Model):
     category = models.OneToOneField(Category)
@@ -12,25 +13,15 @@ class CategorySubdomain(models.Model):
     def __unicode__(self):
         return self.subdomain_slug
 
-    def get_site_domain(self):
-        """Get site domain without leading www."""
-        domain = self.category.site.domain
-        #JS: ta konstanta tam je divna, dal bych si to 'www.' do promene a pak do tech hranatych zavovek domain[len(www):] aby se to upravovalo na jednom miste
-        return domain[4:] if domain.startswith('www.') else domain
+    def get_domain(self, strip_www = True):
+        domain = get_domain_for_category(self.category, strip_www)
+        return domain
 
     def get_subdomain(self):
-        return '%s.%s' % (self.subdomain_slug, self.get_site_domain())
+        return '%s.%s' % (self.subdomain_slug, self.get_domain())
 
     def get_absolute_url(self):
-        return "http://%s%s/" % (self.get_subdomain(), port)
-
-    # JS: tohle fakt jinam
-    @staticmethod
-    def _development_server_port():
-        if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
-            return ':%s' % settings.DEVELOPMENT_SERVER_PORT
-        else:
-            return ''
+        return "http://%s.%s/" % (self.subdomain_slug, self.get_domain(),)
 
     def clean(self):
         """Validates that only first level category is referenced by the CategorySubdomain

@@ -3,20 +3,15 @@ from urlparse import urlparse, urlunparse
 # JS: nepouzity import
 import logging
 
+from django.db.models import get_models
+from django.db.models.signals import class_prepared
+import django.conf.urls.defaults
+import django.core.urlresolvers as urlresolvers
+from django.dispatch import receiver
+
 from django.conf import settings
 
-# JS: import s teckou. Importy z projektu by mely byt az posledni
-
-# FIXME: Maybe should be defined somewhere else.
-def get_domain(strip_www=False, with_development_server_port=True):
-    from django.contrib.sites.models import Site
-    """Return site domain with development server port (if DEBUG)."""
-    domain = Site.objects.get(pk=settings.SITE_ID).domain
-    if with_development_server_port:
-        domain += CategorySubdomain._development_server_port()
-    # JS: viz models.py
-    return domain[4:] if domain.startswith('www.') and strip_www else domain
-
+from ella_category_subdomain.util import get_domain_for_category
 
 def update_parsed_url_list(parsed_url_list):
     # JS: tenhle nazev metody vubec nerika, co to dela
@@ -35,14 +30,13 @@ def get_url_with_subdomain(parsed_url, category_subdomain):
     # We will need mutable version of parsed_url.
     parsed_url_list = list(parsed_url)
 
-    subdomain_slug = category_subdomain.subdomain_slug
     category_path = category_subdomain.category.tree_path
 
     # Strip category tree path (plus slash at the beginning).
     new_path = parsed_url.path[len(category_path)+1:]
 
     # Get subdomain for given category.
-    domain = '%s.%s' % (subdomain_slug, get_domain(strip_www=True))
+    domain = category_subdomain.get_subdomain()
 
     # Change parsed_url_list.
     parsed_url_list[1:3] = domain, new_path
@@ -59,7 +53,7 @@ def get_url_without_subdomain(parsed_url):
     # We will need mutable version of parsed_url.
     parsed_url_list = list(parsed_url)
 
-    parsed_url_list[1] = get_domain(strip_www=False)
+    parsed_url_list[1] = get_domain_for_category(strip_www = False)
     update_parsed_url_list(parsed_url_list)
 
     # Construct and return new url.
@@ -68,6 +62,8 @@ def get_url_without_subdomain(parsed_url):
 
 def get_url(url):
     from ella_category_subdomain.models import CategorySubdomain
+
+    logging.warning("Parsing URL: %s" % (url,))
     # parse url
     parsed_url = urlparse(url)
 
@@ -82,7 +78,10 @@ def get_url(url):
         category_subdomain_list = CategorySubdomain.objects.filter(category__slug = first_path_item)
         # change the URL if found
         if (len(category_subdomain_list) == 1):
-             return get_url_with_subdomain(parsed_url, category_subdomain_list[0])
+            url = get_url_with_subdomain(parsed_url, category_subdomain_list[0])
+            logging.warning("Result with subdomain URL: %s" % (url,))
+
+            return url
 
     # get the URL domain parts
     domain_items = parsed_url.netloc.split('.')
@@ -93,11 +92,24 @@ def get_url(url):
 
     # the URL already modified if exists
     if (len(category_subdomain_list) > 0):
+        logging.warning("Result unchanged")
         return url
     # fill in the default subdomain otherwise
     else:
-        return get_url_without_subdomain(parsed_url)
+        url = get_url_without_subdomain(parsed_url)
+        logging.warning("Result URL: %s" % (url,))
+        return url
 
+def new_resolve(path):
+    logging.warning("Patched resolv: %s" % (path))
+    return path
+
+def patch_resolve(resolve):
+    def wrapper(*args, **kwargs):
+        # Get url from a result of original Django reverse.
+        return new_resolve(resolve(*args, **kwargs))
+    wrapper._original_resolve = resolve
+    return wrapper
 
 
 def patch_reverse(reverse):
@@ -108,16 +120,25 @@ def patch_reverse(reverse):
     return wrapper
 
 
-def do_monkeypatch():
-    from django.db.models import get_models
-    import django.conf.urls.defaults
-    import django.core.urlresolvers as urlresolvers
+#@receiver(class_prepared)
+#def patchmodel(sender, **kwargs):
+#    if hasattr(sender, 'get_absolute_url'):
+#        logging.warning("patching model: %s" % (sender))
+#        sender.get_absolute_url = patch_reverse(sender.get_absolute_url)
+#    else:
+#        logging.warning("not patching model: %s" % (sender))
+#
+#    if not hasattr(urlresolvers.reverse, '_original_reverse'):
+#        logging.warning("patching reverse")
+#        urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
 
-    # Replace django.core.urlresolvers.reverse and do it only once.
-    if not hasattr(urlresolvers.reverse, '_original_reverse'):
-        urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
 
-    # Replace get all the get_absolute_url methods in all the models
-    for model in get_models():
-        if hasattr(model, 'get_absolute_url'):
-            model.get_absolute_url = patch_reverse(model.get_absolute_url)
+#def do_monkeypatch():
+#    # Replace django.core.urlresolvers.reverse and do it only once.
+#    if not hasattr(urlresolvers.reverse, '_original_reverse'):
+#        urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
+#
+#    # Replace get all the get_absolute_url methods in all the models
+#    for model in get_models():
+#        if hasattr(model, 'get_absolute_url'):
+#            model.get_absolute_url = patch_reverse(model.get_absolute_url)
