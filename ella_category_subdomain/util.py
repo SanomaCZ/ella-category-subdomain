@@ -1,13 +1,12 @@
 import logging
 
 from django.conf import settings
-from django.contrib.sites.models import Site
-
-from ella.core.models import Category
 
 
 def get_domain_for_category(category=None, strip_www=False):
     """Return site domain with development server port (if DEBUG)."""
+    from django.contrib.sites.models import Site
+    from ella.core.models import Category
     # get the domain for the category if defined
 
     if category is not None:
