@@ -4,9 +4,6 @@ import django.conf.urls.defaults
 import django.core.urlresolvers as urlresolvers
 
 from django.conf import settings
-from django.db.models import get_models
-from django.db.models.signals import class_prepared
-from django.dispatch import receiver
 
 from ella_category_subdomain.util import get_domain_for_category
 
