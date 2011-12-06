@@ -39,7 +39,7 @@ class CategorySubdomainMiddleware:
             try:
                 category_subdomain = CategorySubdomain.objects.get(subdomain_slug=subdomain)
                 if category_subdomain.category.site.pk == settings.SITE_ID:
-                    result = cs
+                    result = category_subdomain
             except CategorySubdomain.DoesNotExist:
                 pass
         return result
