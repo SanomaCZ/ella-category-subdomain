@@ -20,8 +20,6 @@ def get_domain_for_category(category=None, strip_www=False):
         domain = '%s:%s' % (domain, settings.DEVELOPMENT_SERVER_PORT,)
 
     www = 'www.'
-    logging.warning("Original domain: %s" % (domain,))
     domain = domain[len(www):] if domain.startswith(www) and strip_www else domain
-    logging.warning("Stripped domain: %s" % (domain,))
     return domain
 

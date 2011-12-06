@@ -5,6 +5,8 @@ import logging
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import class_prepared
+from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 import django.core.urlresolvers as urlresolvers
 
@@ -42,22 +44,29 @@ class CategorySubdomain(models.Model):
         verbose_name = _('SEO Category')
         verbose_name_plural = _('SEO Categories')
 
+PATCHED = 0
 
-patched_models = {}
+@receiver(class_prepared)
+def patch_stuff(sender, **kwargs):
+    global PATCHED
+    if PATCHED:
+        return
+    PATCHED = 1
 
-for app in settings.INSTALLED_APPS:
-    if app.startswith('ella'):
+    patched_models = {}
 
-        if (app == 'ella_category_subdomain'):
-            continue
-        logging.debug("Module to import: %s" % (app))
-        module = importlib.import_module('.models', app)
-        module_members = inspect.getmembers(module)
-        for name, member in module_members:
-            if ((inspect.isclass(member)) and
-                (patched_models.get(name, None) is None)):
-                patched_models[name] = 1
-                if hasattr(member, 'get_absolute_url'):
-                    member.get_absolute_url = patch_reverse(member.get_absolute_url)
+    for app in settings.INSTALLED_APPS:
+        if app.startswith('ella'):
 
-urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
+            if (app == 'ella_category_subdomain'):
+                continue
+            module = importlib.import_module('.models', app)
+            module_members = inspect.getmembers(module)
+            for name, member in module_members:
+                if ((inspect.isclass(member)) and
+                    (patched_models.get(name, None) is None)):
+                    patched_models[name] = 1
+                    if hasattr(member, 'get_absolute_url'):
+                        member.get_absolute_url = patch_reverse(member.get_absolute_url)
+
+    urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
