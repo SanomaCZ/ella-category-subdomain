@@ -21,7 +21,8 @@ class CategorySubdomainMiddleware:
 
     def process_request(self, request):
         redirect = None
-        if settings.CATEGORY_SUBDOMAIN_REDIRECT_OLD:
+        if ((hasattr(settings, 'CATEGORY_SUBDOMAIN_REDIRECT_OLD')) and
+            (settings.CATEGORY_SUBDOMAIN_REDIRECT_OLD)):
             redirect = self._get_redirect_if_old_url(request)
         if redirect is None:
             self._translate_path(request)
