@@ -67,7 +67,7 @@ def patch_stuff(sender, **kwargs):
     # go through all the installed applications
     for app in settings.INSTALLED_APPS:
         # process only apps belonging to the ella framework and skip self
-        if ((app.startswith('ella')) and:
+        if ((app.startswith('ella')) and
             (app != 'ella_category_subdomain')):
 
             # import the models package
