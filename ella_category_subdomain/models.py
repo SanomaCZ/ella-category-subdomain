@@ -1,6 +1,5 @@
 import importlib
 import inspect
-import logging
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -44,29 +43,49 @@ class CategorySubdomain(models.Model):
         verbose_name = _('Category Subdomain')
         verbose_name_plural = _('Category Subdomains')
 
+# Flag which indicates that the patches were already implemented
 PATCHED = 0
 
 @receiver(class_prepared)
 def patch_stuff(sender, **kwargs):
+    """The method applies patches upon receiving 'class_prepared' signal. It wraps 'resolve' method of
+    the django urlresolvers module and 'get_absolute_url' method of all ella model instances having the
+    method.
+    """
+    # reference the global flag
     global PATCHED
+    # bail out it the path has been applied already
     if PATCHED:
         return
+
+    # raise the flag of patch application
     PATCHED = 1
 
+    # prepare the buffer carrying the model class already patched. Each import can bring models already pathed.
     patched_models = {}
 
+    # go through all the installed applications
     for app in settings.INSTALLED_APPS:
-        if app.startswith('ella'):
+        # process only apps belonging to the ella framework and skip self
+        if ((app.startswith('ella')) and:
+            (app != 'ella_category_subdomain')):
 
-            if (app == 'ella_category_subdomain'):
-                continue
+            # import the models package
             module = importlib.import_module('.models', app)
+            # get all the package members
             module_members = inspect.getmembers(module)
+
+            # wrap all the 'get_absolute_url' method in all the Model subclasses found
             for name, member in module_members:
                 if ((inspect.isclass(member)) and
+                    (issubclass(member, models.Model))
                     (patched_models.get(name, None) is None)):
+
+                    # record the class has been processed
                     patched_models[name] = 1
+                    # wrap the 'get_absolute_url' method
                     if hasattr(member, 'get_absolute_url'):
                         member.get_absolute_url = patch_reverse(member.get_absolute_url)
 
+    # patch the reverse function
     urlresolvers.reverse = patch_reverse(urlresolvers.reverse)

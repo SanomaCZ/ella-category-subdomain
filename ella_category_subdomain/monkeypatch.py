@@ -1,9 +1,6 @@
 from urlparse import urlparse, urlunparse
 
-import django.conf.urls.defaults
 import django.core.urlresolvers as urlresolvers
-
-from django.conf import settings
 
 from ella_category_subdomain.util import get_domain_for_category
 

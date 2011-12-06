@@ -3,19 +3,19 @@ Created on 11.11.2011
 
 @author: whit
 '''
-import logging
-
 from urlparse import urlparse, urlunparse
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
 
 from ella_category_subdomain.models import CategorySubdomain
-from ella_category_subdomain.monkeypatch import get_url
 from ella_category_subdomain.util import get_domain_for_category
 
 
 class CategorySubdomainMiddleware(object):
+    """The middleware is requirement for the correct function of the application.
+    It rewrites the request path to the original state for the normal django processing.
+    """
 
     def __init__(self):
         super(CategorySubdomainMiddleware, self).__init__()
@@ -26,43 +26,61 @@ class CategorySubdomainMiddleware(object):
         return None
 
     def _get_category_subdomain_for_host(self, host):
+        """Searches for a CategorySubdomain instance matching the first part of the domain.
+        """
+        # split the domain into parts
         domain_parts = host.split('.')
-
+        # prepare the default response
         result = None
-
+        # process the domain if it is of the 3rd level or more
         if (len(domain_parts) > 2):
+            # get the first part of the domain
             subdomain = domain_parts[0].lower()
 
             try:
+                # get the category subdomain
                 category_subdomain = CategorySubdomain.objects.get(subdomain_slug=subdomain)
-
+                # return the CategorySubdomain instance if the category matches the current site
                 if category_subdomain.category.site.pk == settings.SITE_ID:
                     result = category_subdomain
 
             except CategorySubdomain.DoesNotExist:
+                # category subdomain does not exists
                 pass
+
         return result
 
     def _translate_path(self, request):
-        '''Change request.path and request.path_info if "necessary".'''
+        """Change request.path and request.path_info when necessary
+        """
+        # do not translate path if it is part of static prefixes
         for prefix in self.static_prefixes:
             if request.path_info.startswith(prefix):
                 return
 
+        # get the CategorySubdomain instance for the given path
         category_subdomain = self._get_category_subdomain_for_host(request.get_host())
+        # rewrite the path if the category subdomain exists
         if category_subdomain is not None:
             request.path = request.path_info =\
                     '/%s%s' % (category_subdomain.category.path, request.path_info)
-            logging.debug("Category subromain %s, new path: %s", category_subdomain, request.path)
 
 
 class CategorySubdomainRedirectMiddleware(object):
+    """The middleware allows to use original URL for the categories which are
+    configured for subdomains. It redirect the old style URL of the subdomain
+    category to the correct subdomain.
+    """
 
     def process_request(self, request):
         redirect = self._get_redirect_if_old_url(request)
         return redirect
 
     def _get_redirect_if_old_url(self, request):
+        """Returns a HttpResponseRedirect instance when the category configured for a
+        subdomain is detected in the path (i.e. as if there was no subdomain) and redirects
+        the request to correct subdomain URL.
+        """
         # get the site domain
         domain = get_domain_for_category(category=None, strip_www=False)
         # get the current request host
@@ -88,6 +106,9 @@ class CategorySubdomainRedirectMiddleware(object):
                 return HttpResponseRedirect(urlunparse(parsed_url_list))
 
     def _get_category_subdomain_for_path(self, path):
+        """Returns a CategorySubdomain instance for a first part of the path if present in
+        the database.
+        """
         tree_path = path.lstrip('/').split('/')[0]
         try:
             return CategorySubdomain.objects.get(category__tree_path=tree_path,

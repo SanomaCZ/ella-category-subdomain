@@ -2,7 +2,6 @@ import logging
 
 from django.conf import settings
 
-
 def get_domain_for_category(category=None, strip_www=False):
     """Return site domain with development server port (if DEBUG)."""
     from django.contrib.sites.models import Site
