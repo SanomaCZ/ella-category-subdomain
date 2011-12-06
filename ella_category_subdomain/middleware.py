@@ -3,6 +3,7 @@ Created on 11.11.2011
 
 @author: whit
 '''
+import logging
 
 from urlparse import urlparse, urlunparse
 
@@ -67,6 +68,8 @@ class CategorySubdomainMiddleware:
             # here ;-)
             request.path = request.path_info =\
                     '/%s%s' % (category_subdomain.category.path, request.path_info)
+            logging.debug("Category subromain %s, new path: %s", category_subdomain, request.path)
+
 
     def _get_redirect_if_old_url(self, request):
         # get the site domain

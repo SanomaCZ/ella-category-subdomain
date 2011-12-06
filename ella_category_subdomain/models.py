@@ -41,8 +41,8 @@ class CategorySubdomain(models.Model):
 
     class Meta:
         unique_together = (('category', 'subdomain_slug'),)
-        verbose_name = _('SEO Category')
-        verbose_name_plural = _('SEO Categories')
+        verbose_name = _('Category Subdomain')
+        verbose_name_plural = _('Category Subdomains')
 
 PATCHED = 0
 
