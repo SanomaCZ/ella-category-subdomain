@@ -51,7 +51,7 @@ for app in settings.INSTALLED_APPS:
         if (app == 'ella_category_subdomain'):
             continue
         logging.debug("Module to import: %s" % (app))
-        module = importlib.import_module('%s.models' % (app,))
+        module = importlib.import_module('.models', app)
         module_members = inspect.getmembers(module)
         for name, member in module_members:
             if ((inspect.isclass(member)) and
