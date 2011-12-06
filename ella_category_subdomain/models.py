@@ -1,9 +1,16 @@
+import importlib
+import inspect
+import logging
+
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+import django.core.urlresolvers as urlresolvers
 
 from ella.core.models import Category
 
+from ella_category_subdomain.monkeypatch import patch_reverse
 from ella_category_subdomain.util import get_domain_for_category
 
 class CategorySubdomain(models.Model):
@@ -35,3 +42,21 @@ class CategorySubdomain(models.Model):
         verbose_name = _('SEO Category')
         verbose_name_plural = _('SEO Categories')
 
+
+patched_models = {}
+
+for app in settings.INSTALLED_APPS:
+    if app.startswith('ella'):
+
+        if (app == 'ella_category_subdomain'):
+            continue
+        module = importlib.import_module('%s.models' % (app,))
+        module_members = inspect.getmembers(module)
+        for name, member in module_members:
+            if ((inspect.isclass(member)) and
+                (patched_models.get(name, None) is None)):
+                patched_models[name] = 1
+                if hasattr(member, 'get_absolute_url'):
+                    member.get_absolute_url = patch_reverse(member.get_absolute_url)
+
+urlresolvers.reverse = patch_reverse(urlresolvers.reverse)
