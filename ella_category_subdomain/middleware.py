@@ -50,7 +50,8 @@ class CategorySubdomainMiddleware(object):
 
             category = view_kwargs.get('category')
             if (category is not None):
-                view_kwargs['category'] = '%s/%s' % (self.domain_category, category,)
+                new_category = '%s/%s' % (self.domain_category, category,)
+                view_kwargs['category'] = new_category.rstrip('/')
             logging.warning("process view modified: %s, %s, %s", view_func, view_args, view_kwargs)
         return None
 
