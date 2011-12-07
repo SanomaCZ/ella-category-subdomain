@@ -53,6 +53,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'ella_category_subdomain.middleware.CategorySubdomainMiddleware',
+    'ella_category_subdomain.middleware.CategorySubdomainRedirectMiddleware',
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
@@ -70,12 +71,11 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.redirects',
 
+    'ella_category_subdomain',
     'ella.core',
     'ella.photos',
     'ella.newman',
     'ella.articles',
-
-    'ella_category_subdomain',
 
     'djangomarkup',
 
@@ -104,3 +104,5 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.signals.SignalDebugPanel',
     'debug_toolbar.panels.logger.LoggingPanel',
 )
+
+CATEGORY_SUBDOMAIN_OLD_STYLE_URL = True

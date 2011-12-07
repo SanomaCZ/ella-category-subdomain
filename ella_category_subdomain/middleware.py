@@ -3,11 +3,14 @@ Created on 11.11.2011
 
 @author: whit
 '''
+import logging
+
 from urlparse import urlparse, urlunparse
 
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 
+from ella_category_subdomain.conf import ella_category_subdomain_settings
 from ella_category_subdomain.models import CategorySubdomain
 from ella_category_subdomain.util import get_domain_for_category
 
@@ -22,48 +25,35 @@ class CategorySubdomainMiddleware(object):
         self.static_prefixes = [settings.MEDIA_URL,]
 
     def process_request(self, request):
-        self._translate_path(request)
+        host = request.get_host()
+        logging.warning("Path: %s", request.path)
+        logging.warning("Host: %s", host)
+        path_subdomain = CategorySubdomain.get_category_subdomain_for_path(request.path)
+        logging.warning("Path subdomain: %s" % (path_subdomain))
+        if ((path_subdomain is not None) and
+            (not ella_category_subdomain_settings.OLD_STYLE_URL)):
+            raise Http404
+
+        category_subdomain = CategorySubdomain.get_category_subdomain_for_host(host)
+        logging.warning("Category subdomain: %s" % (category_subdomain))
+        self.domain_category = category_subdomain.category.slug if category_subdomain is not None else None
+
         return None
 
-    def _get_category_subdomain_for_host(self, host):
-        """Searches for a CategorySubdomain instance matching the first part of the domain.
-        """
-        # split the domain into parts
-        domain_parts = host.split('.')
-        # prepare the default response
-        result = None
-        # process the domain if it is of the 3rd level or more
-        if (len(domain_parts) > 2):
-            # get the first part of the domain
-            subdomain = domain_parts[0].lower()
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        if (self.domain_category is not None):
+            logging.warning("process view: %s, %s, %s", view_func, view_args, view_kwargs)
 
-            try:
-                # get the category subdomain
-                category_subdomain = CategorySubdomain.objects.get(subdomain_slug=subdomain)
-                # return the CategorySubdomain instance if the category matches the current site
-                if category_subdomain.category.site.pk == settings.SITE_ID:
-                    result = category_subdomain
+            for prefix in self.static_prefixes:
+                if request.path_info.startswith(prefix):
+                    return
 
-            except CategorySubdomain.DoesNotExist:
-                # category subdomain does not exists
-                pass
-
-        return result
-
-    def _translate_path(self, request):
-        """Change request.path and request.path_info when necessary
-        """
-        # do not translate path if it is part of static prefixes
-        for prefix in self.static_prefixes:
-            if request.path_info.startswith(prefix):
-                return
-
-        # get the CategorySubdomain instance for the given path
-        category_subdomain = self._get_category_subdomain_for_host(request.get_host())
-        # rewrite the path if the category subdomain exists
-        if category_subdomain is not None:
-            request.path = request.path_info =\
-                    '/%s%s' % (category_subdomain.category.path, request.path_info)
+            category = view_kwargs.get('category')
+            if (category is not None):
+                new_category = '%s/%s' % (self.domain_category, category,)
+                view_kwargs['category'] = new_category.rstrip('/')
+            logging.warning("process view modified: %s, %s, %s", view_func, view_args, view_kwargs)
+        return None
 
 
 class CategorySubdomainRedirectMiddleware(object):
@@ -86,10 +76,12 @@ class CategorySubdomainRedirectMiddleware(object):
         # get the current request host
         host = request.get_host()
 
+        logging.warning("Host: %s, domain: %s", host, domain)
+
         # try to find a subdomain for a first category in the path if they match
         if host == domain:
             # search for a category subdomain matching the first path of the domain
-            category_subdomain = self._get_category_subdomain_for_path(request.path)
+            category_subdomain = CategorySubdomain.get_category_subdomain_for_path(request.path)
             #
             if category_subdomain is not None:
                 # get the absolute uri of the request
@@ -97,7 +89,7 @@ class CategorySubdomainRedirectMiddleware(object):
                 # parse the uri
                 parsed_url_list = list(urlparse(request_absolute_uri))
                 # get domain name for the category subdomain
-                new_domain = cs.get_subdomain()
+                new_domain = category_subdomain.get_subdomain()
                 # cut off the first category part of the path
                 new_path = request.path[len(category_subdomain.category.tree_path)+1:]
                 # replace domain and path in uri
@@ -105,13 +97,3 @@ class CategorySubdomainRedirectMiddleware(object):
                 # redirect to the new uri
                 return HttpResponseRedirect(urlunparse(parsed_url_list))
 
-    def _get_category_subdomain_for_path(self, path):
-        """Returns a CategorySubdomain instance for a first part of the path if present in
-        the database.
-        """
-        tree_path = path.lstrip('/').split('/')[0]
-        try:
-            return CategorySubdomain.objects.get(category__tree_path=tree_path,
-                                                 category__site__pk=settings.SITE_ID)
-        except CategorySubdomain.DoesNotExist:
-            return None
