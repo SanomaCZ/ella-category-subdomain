@@ -78,8 +78,8 @@ def patch_stuff(sender, **kwargs):
             # wrap all the 'get_absolute_url' method in all the Model subclasses found
             for name, member in module_members:
                 if ((inspect.isclass(member)) and
-                    (issubclass(member, models.Model))
-                    (patched_models.get(name, None) is None)):
+                    (issubclass(member, models.Model)) and
+                    (patched_models.get(name) is None)):
 
                     # record the class has been processed
                     patched_models[name] = 1
