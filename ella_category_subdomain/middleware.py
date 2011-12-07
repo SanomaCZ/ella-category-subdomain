@@ -49,9 +49,7 @@ class CategorySubdomainMiddleware(object):
                     return
 
             category = view_kwargs.get('category')
-            if (category is None):
-                view_kwargs['category'] = '%s' % (self.domain_category)
-            else:
+            if (category is not None):
                 view_kwargs['category'] = '%s/%s' % (self.domain_category, category,)
             logging.warning("process view modified: %s, %s, %s", view_func, view_args, view_kwargs)
         return None
