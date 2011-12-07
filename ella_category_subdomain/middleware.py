@@ -43,6 +43,11 @@ class CategorySubdomainMiddleware(object):
     def process_view(self, request, view_func, view_args, view_kwargs):
         if (self.domain_category is not None):
             logging.warning("process view: %s, %s, %s", view_func, view_args, view_kwargs)
+
+            for prefix in self.static_prefixes:
+                if request.path_info.startswith(prefix):
+                    return
+
             category = view_kwargs.get('category')
             if (category is None):
                 view_kwargs['category'] = '%s' % (self.domain_category)
