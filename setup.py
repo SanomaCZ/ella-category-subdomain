@@ -1,5 +1,6 @@
 from setuptools import setup
 from ella_category_subdomain import __versionstr__
+import sys
 
 setup(
     name = 'Ella-Category-Subdomain',
@@ -7,7 +8,7 @@ setup(
     description = 'Use Ella categories as subdomains.',
     long_description = """Use selected Ella categories as subdomains without
     the need to create many sites and for easier administration.
-    
+
     It is usable for SEO, microsites, landing pages and similar things.""",
     author = 'Sanoma Media Praha s.r.o.',
     author_email = 'online-dev@sanomamedia.cz',
@@ -34,6 +35,11 @@ setup(
     ],
 
     install_requires = [
+        'setuptools>=0.6b1',
+        'ella>=2.0',
+        'importlib'
+    ] if sys.version < '2.7'
+    else [
         'setuptools>=0.6b1',
         'ella>=2.0',
     ],
