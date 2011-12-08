@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# Ella Category Subdomains documentation build configuration file, created by
-# sphinx-quickstart on Tue Nov 29 11:09:44 2011.
+# Ella Category Subdomain documentation build configuration file, created by
+# sphinx-quickstart on Wed Dec  7 15:01:31 2011.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -40,8 +40,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Ella Category Subdomains'
-copyright = u'2011, Sanoma Media'
+project = u'Ella Category Subdomain'
+copyright = u'2011, Sanoma Media s.r.o.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'EllaCategorySubdomainsdoc'
+htmlhelp_basename = 'EllaCategorySubdomaindoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -178,8 +178,8 @@ htmlhelp_basename = 'EllaCategorySubdomainsdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'EllaCategorySubdomains.tex', u'Ella Category Subdomains Documentation',
-   u'Jakub Skaryd, Tomas Flam', 'manual'),
+  ('index', 'EllaCategorySubdomain.tex', u'Ella Category Subdomain Documentation',
+   u'Sanoma Media s.r.o.', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -211,6 +211,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'ellacategorysubdomains', u'Ella Category Subdomains Documentation',
-     [u'Jakub Skaryd, Tomas Flam'], 1)
+    ('index', 'ellacategorysubdomain', u'Ella Category Subdomain Documentation',
+     [u'Sanoma Media s.r.o.'], 1)
 ]
