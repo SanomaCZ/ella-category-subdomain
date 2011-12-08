@@ -3,4 +3,4 @@
 .tox/
 *.egg-info
 .coverage
-doc/build
+doc/_build
