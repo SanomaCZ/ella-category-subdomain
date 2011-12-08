@@ -1,2 +1,5 @@
 .*.swp
-*.pyc
+*.py[co]
+.tox/
+*.egg-info
+.coverage
