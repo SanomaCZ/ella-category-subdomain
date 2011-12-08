@@ -13,8 +13,8 @@ is important for SEO optimalization.
 Documentation
 =============
 
-Installation: :ref:`installation` |
-Configuration: :ref:`configuration`
+* Installation: :ref:`installation` 
+* Configuration: :ref:`configuration`
 
 .. toctree::
    :glob: 
