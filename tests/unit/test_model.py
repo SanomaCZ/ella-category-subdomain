@@ -36,38 +36,38 @@ class TestModelCase(DatabaseTestCase):
 
     def test_get_category_subdomain_for_host_example_com(self):
         host = "example.com"
-        self.assert_is_none(CategorySubdomain.get_category_subdomain_for_host(host))
+        self.assert_is_none(CategorySubdomain.objects.get_for_host(host))
 
     def test_get_category_subdomain_for_host_www_example_com(self):
         host = "www.example.com"
-        self.assert_is_none(CategorySubdomain.get_category_subdomain_for_host(host))
+        self.assert_is_none(CategorySubdomain.objects.get_for_host(host))
 
     def test_get_category_subdomain_for_host_nocategory_example_com(self):
         host = "nocategory.example.com"
-        self.assert_is_none(CategorySubdomain.get_category_subdomain_for_host(host))
+        self.assert_is_none(CategorySubdomain.objects.get_for_host(host))
 
     def test_get_category_subdomain_for_host_nested_one_example_com(self):
         host = "nested-one.example.com"
-        category_subdomain = CategorySubdomain.get_category_subdomain_for_host(host)
+        category_subdomain = CategorySubdomain.objects.get_for_host(host)
         self.assert_is_not_none(category_subdomain)
         self.assert_equals(category_subdomain.subdomain_slug, 'nested-one')
 
     def test_get_category_subdomain_for_path(self):
         path = "/"
-        self.assert_is_none(CategorySubdomain.get_category_subdomain_for_path(path))
+        self.assert_is_none(CategorySubdomain.objects.get_for_path(path))
 
     def test_get_category_subdomain_for_path_nosubdomain(self):
         path = "/nosubdomain/"
-        self.assert_is_none(CategorySubdomain.get_category_subdomain_for_path(path))
+        self.assert_is_none(CategorySubdomain.objects.get_for_path(path))
 
     def test_get_category_subdomain_for_path_nested_1(self):
         path = "/nested-1/"
-        category_subdomain = CategorySubdomain.get_category_subdomain_for_path(path)
+        category_subdomain = CategorySubdomain.objects.get_for_path(path)
         self.assert_is_not_none(category_subdomain)
         self.assert_equals(category_subdomain.subdomain_slug, 'nested-one')
 
     def test_get_category_subdomain_for_path_nested_nested_1(self):
         path = "/nested-1/nested-nested-1"
-        category_subdomain = CategorySubdomain.get_category_subdomain_for_path(path)
+        category_subdomain = CategorySubdomain.objects.get_for_path(path)
         self.assert_is_not_none(category_subdomain)
         self.assert_equals(category_subdomain.subdomain_slug, 'nested-one')
