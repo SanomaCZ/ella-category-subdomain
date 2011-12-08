@@ -1,21 +1,22 @@
-from setuptools import setup, find_packages
-import ella_category_subdomain
+from setuptools import setup
+from ella_category_subdomain import __versionstr__
 
 setup(
     name = 'Ella-Category-Subdomain',
-    version = ella_category_subdomain.__versionstr__,
+    version = __versionstr__,
     description = 'Use Ella categories as subdomains.',
-    long_description = 'Use selected Ella categories as subdomains without creating many sites.',
-    author = 'Vitek Pliska',
-    author_email='whit@jizak.cz',
+    long_description = """Use selected Ella categories as subdomains without
+    the need to create many sites and for easier administration.
+    
+    It is usable for SEO, microsites, landing pages and similar things.""",
+    author = 'Sanoma Media Praha s.r.o.',
+    author_email = 'online-dev@sanomamedia.cz',
+    maintainer = 'Vitek Pliska',
+    maintainer_email='whit@jizak.cz',
     license = 'BSD',
-    url='http://github.com/whit/',
+    url='http://github.com/sanomacz/ella-category-subdomain/',
 
-    packages = find_packages(
-        where = '.',
-        exclude = ('docs', 'tests')
-    ),
-
+    packages = ('ella_category_subdomain',),
     include_package_data = True,
 
     classifiers=[
