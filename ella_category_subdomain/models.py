@@ -14,7 +14,49 @@ from ella.core.models import Category
 from ella_category_subdomain.monkeypatch import patch_reverse
 from ella_category_subdomain.util import get_domain_for_category
 
+class CategorySubdomainManager(models.Manager):
+
+    def get_for_path(self, path):
+        """Returns a CategorySubdomain instance for a first part of the path if present in
+        the database.
+        """
+        path_items = [path_item for path_item in path.split('/') if len(path_item)>0]
+        result = None
+        if (len(path_items) > 0):
+            slug = path_items[0]
+            try:
+                result = self.get(category__slug=slug, category__site__id=settings.SITE_ID)
+            except self.model.DoesNotExist:
+                pass
+
+        return result
+
+    def get_for_host(self, host):
+        """Searches for a CategorySubdomain instance matching the first part of the domain.
+        """
+        # split the domain into parts
+        domain_parts = host.split('.')
+        # prepare the default response
+        result = None
+        # process the domain if it is of the 3rd level or more
+        if (len(domain_parts) > 2):
+            # get the first part of the domain
+            subdomain = domain_parts[0].lower()
+
+            try:
+                # get the category subdomain
+                result = self.get(subdomain_slug=subdomain, category__site__id=settings.SITE_ID)
+
+            except self.model.DoesNotExist:
+                # category subdomain does not exists
+                pass
+
+        return result
+
+
 class CategorySubdomain(models.Model):
+    objects = CategorySubdomainManager()
+
     category = models.OneToOneField(Category)
     subdomain_slug = models.SlugField(max_length=64)
 
@@ -30,47 +72,6 @@ class CategorySubdomain(models.Model):
 
     def get_absolute_url(self):
         return "http://%s.%s/" % (self.subdomain_slug, self.get_domain(),)
-
-    @staticmethod
-    def get_category_subdomain_for_path(path):
-        """Returns a CategorySubdomain instance for a first part of the path if present in
-        the database.
-        """
-        path_items = [path_item for path_item in path.split('/') if len(path_item)>0]
-        result = None
-        if (len(path_items) > 0):
-            slug = path_items[0]
-            try:
-                result = CategorySubdomain.objects.get(category__slug=slug,
-                                                       category__site__id=settings.SITE_ID)
-            except CategorySubdomain.DoesNotExist:
-                pass
-
-        return result
-
-    @staticmethod
-    def get_category_subdomain_for_host(host):
-        """Searches for a CategorySubdomain instance matching the first part of the domain.
-        """
-        # split the domain into parts
-        domain_parts = host.split('.')
-        # prepare the default response
-        result = None
-        # process the domain if it is of the 3rd level or more
-        if (len(domain_parts) > 2):
-            # get the first part of the domain
-            subdomain = domain_parts[0].lower()
-
-            try:
-                # get the category subdomain
-                result = CategorySubdomain.objects.get(subdomain_slug=subdomain,
-                                                       category__site__id=settings.SITE_ID)
-
-            except CategorySubdomain.DoesNotExist:
-                # category subdomain does not exists
-                pass
-
-        return result
 
     def clean(self):
         """Validates that only first level category is referenced by the CategorySubdomain

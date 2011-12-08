@@ -1,8 +1,3 @@
-'''
-Created on 11.11.2011
-
-@author: whit
-'''
 import logging
 
 from urlparse import urlparse, urlunparse
@@ -14,7 +9,6 @@ from ella_category_subdomain.conf import ella_category_subdomain_settings
 from ella_category_subdomain.models import CategorySubdomain
 from ella_category_subdomain.util import get_domain_for_category
 
-
 class CategorySubdomainMiddleware(object):
     """The middleware is requirement for the correct function of the application.
     It rewrites the request path to the original state for the normal django processing.
@@ -23,26 +17,27 @@ class CategorySubdomainMiddleware(object):
     def __init__(self):
         super(CategorySubdomainMiddleware, self).__init__()
         self.static_prefixes = [settings.MEDIA_URL,]
+        self.log = logging.getLogger("%s.%s" % (__name__, self.__class__.__name__))
 
     def process_request(self, request):
         host = request.get_host()
-        logging.warning("Path: %s", request.path)
-        logging.warning("Host: %s", host)
-        path_subdomain = CategorySubdomain.get_category_subdomain_for_path(request.path)
-        logging.warning("Path subdomain: %s" % (path_subdomain))
+        self.log.warning("Path: %s", request.path)
+        self.log.warning("Host: %s", host)
+        path_subdomain = CategorySubdomain.objects.get_for_path(request.path)
+        self.log.warning("Path subdomain: %s" % (path_subdomain))
         if ((path_subdomain is not None) and
             (not ella_category_subdomain_settings.OLD_STYLE_URL)):
             raise Http404
 
-        category_subdomain = CategorySubdomain.get_category_subdomain_for_host(host)
-        logging.warning("Category subdomain: %s" % (category_subdomain))
+        category_subdomain = CategorySubdomain.objects.get_for_host(host)
+        self.log.warning("Category subdomain: %s" % (category_subdomain))
         self.domain_category = category_subdomain.category.slug if category_subdomain is not None else None
 
         return None
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         if (self.domain_category is not None):
-            logging.warning("process view: %s, %s, %s", view_func, view_args, view_kwargs)
+            self.log.warning("process view: %s, %s, %s", view_func, view_args, view_kwargs)
 
             for prefix in self.static_prefixes:
                 if request.path_info.startswith(prefix):
@@ -52,7 +47,7 @@ class CategorySubdomainMiddleware(object):
             if (category is not None):
                 new_category = '%s/%s' % (self.domain_category, category,)
                 view_kwargs['category'] = new_category.rstrip('/')
-            logging.warning("process view modified: %s, %s, %s", view_func, view_args, view_kwargs)
+            self.log.warning("process view modified: %s, %s, %s", view_func, view_args, view_kwargs)
         return None
 
 
@@ -61,6 +56,10 @@ class CategorySubdomainRedirectMiddleware(object):
     configured for subdomains. It redirect the old style URL of the subdomain
     category to the correct subdomain.
     """
+
+    def __init__(self):
+        self.log = logging.getLogger("%s.%s" % (__name__, self.__class__.__name__))
+
 
     def process_request(self, request):
         redirect = self._get_redirect_if_old_url(request)
@@ -76,12 +75,12 @@ class CategorySubdomainRedirectMiddleware(object):
         # get the current request host
         host = request.get_host()
 
-        logging.warning("Host: %s, domain: %s", host, domain)
+        self.log.warning("Host: %s, domain: %s", host, domain)
 
         # try to find a subdomain for a first category in the path if they match
         if host == domain:
             # search for a category subdomain matching the first path of the domain
-            category_subdomain = CategorySubdomain.get_category_subdomain_for_path(request.path)
+            category_subdomain = CategorySubdomain.objects.get_for_path(request.path)
             #
             if category_subdomain is not None:
                 # get the absolute uri of the request
