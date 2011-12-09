@@ -29,7 +29,7 @@ Tests
 
 You can run tests for this application, here is example::
 
-    # create and acivat e virtualenv, then
+    # create and acivate virtualenv, then
     pip install -r requirements/base.txt -r requirements/test.txt
     ./tests/unit/run_tests.py
 
@@ -38,6 +38,5 @@ TODO
 ====
 
   * caching
-  * move methods to manager
   * tests with client (middleware)
 
