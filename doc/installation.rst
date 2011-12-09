@@ -4,7 +4,7 @@ Installation
 ============
 
 The application is provided via pypi. It is possible to install it using::
-    
+
     ...
     pip install Ella-Category-Subdomain
     ...
@@ -12,16 +12,12 @@ The application is provided via pypi. It is possible to install it using::
 Dependencies
 ============
 
-For the correct functionality, only `Ella`_ CMS is required when running on `Python`_
-version ``2.7`` and newer. For previous versions of `Python`_ an ``importlib`` module is also 
-required.
+For the correct functionality, only `Ella`_ CMS is required.
 
 Please find the requirements in the requirements directory:
 
-* file base.txt for `Python`_ ``2.7`` and newer
-* file base_py_26.txt for `Python`_ ``2.6`` and older
+* file base.txt
 
-.. _Python: http://www.python.org
 .. _Ella: http://www.ellaproject.cz
 
 Source Code

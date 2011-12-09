@@ -1,6 +1,5 @@
 from setuptools import setup
 from ella_category_subdomain import __versionstr__
-import sys
 
 setup(
     name = 'Ella-Category-Subdomain',
@@ -35,11 +34,6 @@ setup(
     ],
 
     install_requires = [
-        'setuptools>=0.6b1',
-        'ella>=2.0',
-        'importlib'
-    ] if sys.version < '2.7'
-    else [
         'setuptools>=0.6b1',
         'ella>=2.0',
     ],

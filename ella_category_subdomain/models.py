@@ -1,5 +1,6 @@
-import importlib
 import inspect
+
+import django.core.urlresolvers as urlresolvers
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -7,9 +8,10 @@ from django.db import models
 from django.db.models.signals import class_prepared
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
-import django.core.urlresolvers as urlresolvers
+from django.utils.importlib import import_module
 
 from ella.core.models import Category
+from ella.core.cache.utils import get_cached_object
 
 from ella_category_subdomain.monkeypatch import patch_reverse
 from ella_category_subdomain.util import get_domain_for_category
@@ -25,7 +27,8 @@ class CategorySubdomainManager(models.Manager):
         if (len(path_items) > 0):
             slug = path_items[0]
             try:
-                result = self.get(category__slug=slug, category__site__id=settings.SITE_ID)
+                result = get_cached_object(self.model, \
+                        category__slug=slug, category__site__id=settings.SITE_ID)
             except self.model.DoesNotExist:
                 pass
 
@@ -45,7 +48,8 @@ class CategorySubdomainManager(models.Manager):
 
             try:
                 # get the category subdomain
-                result = self.get(subdomain_slug=subdomain, category__site__id=settings.SITE_ID)
+                result = get_cached_object(self.model, \
+                        subdomain_slug=subdomain, category__site__id=settings.SITE_ID)
 
             except self.model.DoesNotExist:
                 # category subdomain does not exists
@@ -113,7 +117,7 @@ def patch_stuff(sender, **kwargs):
             (app != 'ella_category_subdomain')):
 
             # import the models package
-            module = importlib.import_module('.models', app)
+            module = import_module('.models', app)
             # get all the package members
             module_members = inspect.getmembers(module)
 

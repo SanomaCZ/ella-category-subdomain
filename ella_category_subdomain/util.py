@@ -8,7 +8,7 @@ def get_domain_for_category(category=None, strip_www=False):
         domain = category.site.domain
     # get the site domain otherwise
     else:
-        domain = Site.objects.get(pk=settings.SITE_ID).domain
+        domain = Site.objects.get_current().domain
 
     # append the port to the domain when neccessary
     if settings.DEBUG and hasattr(settings, 'DEVELOPMENT_SERVER_PORT'):
