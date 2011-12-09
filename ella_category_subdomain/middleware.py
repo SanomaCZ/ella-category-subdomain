@@ -29,28 +29,21 @@ class CategorySubdomainMiddleware(object):
             (not ella_category_subdomain_settings.OLD_STYLE_URL)):
             raise Http404
 
-        category_subdomain = CategorySubdomain.objects.get_for_host(host)
-        self.log.debug("Category subdomain: %s" % (category_subdomain))
-        self.domain_category = category_subdomain.category.slug if category_subdomain is not None else None
+        self.category_subdomain = CategorySubdomain.objects.get_for_host(host)
 
         return None
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        if (self.domain_category is not None):
+        if (self.category_subdomain is not None):
             self.log.debug("process view: %s, %s, %s", view_func, view_args, view_kwargs)
 
             for prefix in self.static_prefixes:
                 if request.path_info.startswith(prefix):
                     return
 
-            category = view_kwargs.get('category')
-            if (category is not None):
-                new_category = '%s/%s' % (self.domain_category, category,)
-                view_kwargs['category'] = new_category.rstrip('/')
-            else:
-                new_category = '%s' % (self.domain_category,)
-                view_kwargs['category'] = new_category
+            view_kwargs['category'] = self.category_subdomain.category.tree_path
             self.log.debug("process view modified: %s, %s, %s", view_func, view_args, view_kwargs)
+
         return None
 
 
