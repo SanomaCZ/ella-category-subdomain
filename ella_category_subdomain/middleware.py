@@ -47,6 +47,9 @@ class CategorySubdomainMiddleware(object):
             if (category is not None):
                 new_category = '%s/%s' % (self.domain_category, category,)
                 view_kwargs['category'] = new_category.rstrip('/')
+            else:
+                new_category = '%s' % (self.domain_category,)
+                view_kwargs['category'] = new_category
             self.log.debug("process view modified: %s, %s, %s", view_func, view_args, view_kwargs)
         return None
 
