@@ -3,6 +3,7 @@ import inspect
 import django.core.urlresolvers as urlresolvers
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import class_prepared
@@ -106,6 +107,19 @@ def patch_stuff(sender, **kwargs):
 
     # raise the flag of patch application
     PATCHED = 1
+
+    # raise an error if the current application does not precede any other ella application
+    ella_found = False
+    for app in settings.INSTALLED_APPS:
+        if ((app.startswith('ella')) and
+            (app != 'ella_category_subdomain')):
+            ella_found = True
+
+        if app == 'ella_category_subdomain':
+            if ella_found:
+                raise ImproperlyConfigured(_('Ella category subdomain application must precede any other ella application in INSTALLED_APPS.'))
+            else:
+                break
 
     # prepare the buffer carrying the model class already patched. Each import can bring models already pathed.
     patched_models = {}

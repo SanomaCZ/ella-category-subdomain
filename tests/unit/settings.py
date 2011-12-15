@@ -49,10 +49,10 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sites',
 
+    'ella_category_subdomain',
     'ella.core',
     'ella.articles',
     'ella.photos',
     'ella.polls',
-    'ella_category_subdomain',
 )
 
