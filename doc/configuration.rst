@@ -71,3 +71,12 @@ used before the *Ella Category Subdomain* application has been used.
     * When *False* only new style URLs are allowed, throwing *404* error code when the old style URL is used.
     * When *True*, the both forms are allowed.
     * When *True* and the *CategorySubdomainRedirectMiddleware* is configured, the old style URLs are redirected to new ones.
+   
+The Ella Category Subdomain application provides a new setting parameter called ``CATEGORY_SUBDOMAIN_IGNORE_PATHS``.::   
+
+	...    
+	CATEGORY_SUBDOMAIN_IGNORE_PATHS = ['/feeds/rss', '/feeds/atom', ]
+	...
+	
+The parameter is a list of URL paths which are not category related. As the list of all paths cannot be detected or found out
+otherwise, so this has been added to help.

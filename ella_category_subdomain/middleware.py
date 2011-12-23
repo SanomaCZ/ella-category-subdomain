@@ -16,7 +16,8 @@ class CategorySubdomainMiddleware(object):
 
     def __init__(self):
         super(CategorySubdomainMiddleware, self).__init__()
-        self.static_prefixes = [settings.MEDIA_URL,]
+        self.static_prefixes = [settings.MEDIA_URL, ]
+        self.static_prefixes.extend(ella_category_subdomain_settings.IGNORE_PATHS)
         self.log = logging.getLogger("%s.%s" % (__name__, self.__class__.__name__))
 
     def process_request(self, request):
@@ -86,7 +87,7 @@ class CategorySubdomainRedirectMiddleware(object):
                 # get domain name for the category subdomain
                 new_domain = category_subdomain.get_subdomain()
                 # cut off the first category part of the path
-                new_path = request.path[len(category_subdomain.category.tree_path)+1:]
+                new_path = request.path[len(category_subdomain.category.tree_path) + 1:]
                 # replace domain and path in uri
                 parsed_url_list[1:3] = new_domain, new_path
                 # redirect to the new uri
