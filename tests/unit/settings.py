@@ -29,7 +29,7 @@ ADMIN_MEDIA_PREFIX = '/admin_media/'
 
 
 MIDDLEWARE_CLASSES = (
-#    'ella_category_subdomain.middleware.CategorySubdomainMiddleware',
+    'ella_category_subdomain.middleware.CategorySubdomainMiddleware',
     'django.middleware.common.CommonMiddleware',
 )
 
@@ -44,15 +44,16 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'ella_category_subdomain',
     'django.contrib.auth',
     'django.contrib.flatpages',
     'django.contrib.contenttypes',
     'django.contrib.sites',
 
-    'ella_category_subdomain',
     'ella.core',
     'ella.articles',
-    'ella.photos',
-    'ella.polls',
+    #'ella.photos',
+    #'ella.polls',
 )
+
 

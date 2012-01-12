@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from djangosanetesting import UnitTestCase
+from django.test import TestCase
+from nose import tools
 
-class TestBasicAsserts(UnitTestCase):
+class TestBasicAsserts(TestCase):
+    
     def test_assert_equals(self):
-        self.assert_equals(1, 1)
+        tools.assert_equals(1, 1)
