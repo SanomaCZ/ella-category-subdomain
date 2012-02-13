@@ -9,9 +9,11 @@ from ella_category_subdomain.conf import ella_category_subdomain_settings
 from ella_category_subdomain.models import CategorySubdomain
 from ella_category_subdomain.util import get_domain_for_category
 
+
 class CategorySubdomainMiddleware(object):
-    """The middleware is requirement for the correct function of the application.
-    It rewrites the request path to the original state for the normal django processing.
+    """The middleware is requirement for the correct function of the
+    application. It rewrites the request path to the original state for
+     the normal django processing.
     """
 
     def __init__(self):
@@ -57,7 +59,6 @@ class CategorySubdomainRedirectMiddleware(object):
     def __init__(self):
         self.log = logging.getLogger("%s.%s" % (__name__, self.__class__.__name__))
 
-
     def process_request(self, request):
         redirect = self._get_redirect_if_old_url(request)
         return redirect
@@ -92,4 +93,3 @@ class CategorySubdomainRedirectMiddleware(object):
                 parsed_url_list[1:3] = new_domain, new_path
                 # redirect to the new uri
                 return HttpResponseRedirect(urlunparse(parsed_url_list))
-

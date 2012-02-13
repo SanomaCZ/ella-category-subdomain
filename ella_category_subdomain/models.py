@@ -17,13 +17,14 @@ from ella.core.cache.utils import get_cached_object
 from ella_category_subdomain.monkeypatch import patch_reverse
 from ella_category_subdomain.util import get_domain_for_category
 
+
 class CategorySubdomainManager(models.Manager):
 
     def get_for_path(self, path):
-        """Returns a CategorySubdomain instance for a first part of the path if present in
-        the database.
+        """Returns a CategorySubdomain instance for a first part of the path
+        if present in the database.
         """
-        path_items = [path_item for path_item in path.split('/') if len(path_item)>0]
+        path_items = [path_item for path_item in path.split('/') if len(path_item) > 0]
         result = None
         if (len(path_items) > 0):
             slug = path_items[0]
@@ -36,7 +37,8 @@ class CategorySubdomainManager(models.Manager):
         return result
 
     def get_for_host(self, host):
-        """Searches for a CategorySubdomain instance matching the first part of the domain.
+        """Searches for a CategorySubdomain instance matching the first part
+        of the domain.
         """
         # split the domain into parts
         domain_parts = host.split('.')
@@ -68,7 +70,7 @@ class CategorySubdomain(models.Model):
     def __unicode__(self):
         return self.subdomain_slug
 
-    def get_domain(self, strip_www = True):
+    def get_domain(self, strip_www=True):
         domain = get_domain_for_category(self.category, strip_www)
         return domain
 
@@ -92,6 +94,7 @@ class CategorySubdomain(models.Model):
 
 # Flag which indicates that the patches were already implemented
 PATCHED = 0
+
 
 @receiver(class_prepared)
 def patch_stuff(sender, **kwargs):
@@ -130,22 +133,25 @@ def patch_stuff(sender, **kwargs):
         if ((app.startswith('ella')) and
             (app != 'ella_category_subdomain')):
 
-            # import the models package
-            module = import_module('.models', app)
-            # get all the package members
-            module_members = inspect.getmembers(module)
+            try:
+                # import the models package
+                module = import_module('.models', app)
+                # get all the package members
+                module_members = inspect.getmembers(module)
 
-            # wrap all the 'get_absolute_url' method in all the Model subclasses found
-            for name, member in module_members:
-                if ((inspect.isclass(member)) and
-                    (issubclass(member, models.Model)) and
-                    (patched_models.get(name) is None)):
+                # wrap all the 'get_absolute_url' method in all the Model subclasses found
+                for name, member in module_members:
+                    if ((inspect.isclass(member)) and
+                        (issubclass(member, models.Model)) and
+                        (patched_models.get(name) is None)):
 
-                    # record the class has been processed
-                    patched_models[name] = 1
-                    # wrap the 'get_absolute_url' method
-                    if hasattr(member, 'get_absolute_url'):
-                        member.get_absolute_url = patch_reverse(member.get_absolute_url)
+                        # record the class has been processed
+                        patched_models[name] = 1
+                        # wrap the 'get_absolute_url' method
+                        if hasattr(member, 'get_absolute_url'):
+                            member.get_absolute_url = patch_reverse(member.get_absolute_url)
+            except ImportError:
+                pass
 
     # patch the reverse function
     urlresolvers.reverse = patch_reverse(urlresolvers.reverse)

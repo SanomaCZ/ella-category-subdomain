@@ -1,23 +1,22 @@
 from urlparse import urlparse, urlunparse
 
-import django.core.urlresolvers as urlresolvers
-
 from ella_category_subdomain.util import get_domain_for_category
+
 
 def update_parsed_url_list(parsed_url_list):
     # If parsed_url has scheme attribute then preserve it,
     # else default to http.
     parsed_url_list[0] = parsed_url_list[0] or 'http'
 
+
 def get_url_with_subdomain(parsed_url, category_subdomain):
-    # JS: myslim, ze doporuceni je psat mala pismena a bez tecky na konci, pokud jde o jednu vetu
     # We will need mutable version of parsed_url.
     parsed_url_list = list(parsed_url)
 
     category_path = category_subdomain.category.tree_path
 
     # Strip category tree path (plus slash at the beginning).
-    new_path = parsed_url.path[len(category_path)+1:]
+    new_path = parsed_url.path[len(category_path) + 1:]
 
     # Get subdomain for given category.
     domain = category_subdomain.get_subdomain()
@@ -30,17 +29,17 @@ def get_url_with_subdomain(parsed_url, category_subdomain):
     # Construct and return new url.
     return urlunparse(parsed_url_list)
 
-def get_url_without_subdomain(parsed_url):
-    parts = parsed_url.netloc.split('.')
 
+def get_url_without_subdomain(parsed_url):
     # We will need mutable version of parsed_url.
     parsed_url_list = list(parsed_url)
 
-    parsed_url_list[1] = get_domain_for_category(strip_www = False)
+    parsed_url_list[1] = get_domain_for_category(strip_www=False)
     update_parsed_url_list(parsed_url_list)
 
     # Construct and return new url.
     return urlunparse(parsed_url_list)
+
 
 def get_url(url):
     from ella_category_subdomain.models import CategorySubdomain
@@ -56,7 +55,7 @@ def get_url(url):
         # get the first path item
         first_path_item = path_items[0]
         # search for the particular subdomain category
-        category_subdomain_list = CategorySubdomain.objects.filter(category__slug = first_path_item)
+        category_subdomain_list = CategorySubdomain.objects.filter(category__slug=first_path_item)
         # change the URL if found
         if (len(category_subdomain_list) == 1):
             url = get_url_with_subdomain(parsed_url, category_subdomain_list[0])
@@ -68,7 +67,7 @@ def get_url(url):
     # get the first domain part
     first_domain_item = domain_items[0]
     # search for the particular subdomain category
-    category_subdomain_list = CategorySubdomain.objects.filter(subdomain_slug = first_domain_item)
+    category_subdomain_list = CategorySubdomain.objects.filter(subdomain_slug=first_domain_item)
 
     # the URL already modified if exists
     if (len(category_subdomain_list) > 0):
@@ -78,10 +77,10 @@ def get_url(url):
         url = get_url_without_subdomain(parsed_url)
         return url
 
+
 def patch_reverse(reverse):
     def wrapper(*args, **kwargs):
         # Get url from a result of original Django reverse.
         return get_url(reverse(*args, **kwargs))
     wrapper._original_reverse = reverse
     return wrapper
-
