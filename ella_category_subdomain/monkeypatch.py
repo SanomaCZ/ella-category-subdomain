@@ -1,7 +1,6 @@
 from urlparse import urlparse, urlunparse
 
-from ella_category_subdomain.conf import ella_category_subdomain_settings
-from ella_category_subdomain.util import get_domain_for_category
+from ella_category_subdomain.util import get_domain_for_category, is_path_ignored
 
 
 def update_parsed_url_list(parsed_url_list):
@@ -49,9 +48,8 @@ def get_url(url):
     parsed_url = urlparse(url)
 
     # skip ignored paths
-    for prefix in ella_category_subdomain_settings.IGNORE_PATHS:
-        if parsed_url.path.startswith(prefix):
-            return url
+    if is_path_ignored(parsed_url.path):
+        return url
 
     # get non-empty URL path items
     path_items = [item for item in parsed_url.path.split('/') if (len(item) > 0)]

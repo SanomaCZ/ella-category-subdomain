@@ -2,12 +2,11 @@ import logging
 
 from urlparse import urlparse, urlunparse
 
-from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 
 from ella_category_subdomain.conf import ella_category_subdomain_settings
 from ella_category_subdomain.models import CategorySubdomain
-from ella_category_subdomain.util import get_domain_for_category
+from ella_category_subdomain.util import get_domain_for_category, is_path_ignored
 
 
 class CategorySubdomainMiddleware(object):
@@ -39,9 +38,8 @@ class CategorySubdomainMiddleware(object):
             self.log.debug("process view: %s, %s, %s", view_func, view_args, view_kwargs)
 
             # skip ignored paths
-            for prefix in ella_category_subdomain_settings.IGNORE_PATHS:
-                if request.path_info.startswith(prefix):
-                    return
+            if is_path_ignored(request.path_info):
+                return
 
             view_kwargs['category'] = self.category_subdomain.category.tree_path
             self.log.debug("process view modified: %s, %s, %s", view_func, view_args, view_kwargs)
@@ -68,9 +66,8 @@ class CategorySubdomainRedirectMiddleware(object):
         the request to correct subdomain URL.
         """
         # skip for ignored paths
-        for prefix in ella_category_subdomain_settings.IGNORE_PATHS:
-            if request.path_info.startswith(prefix):
-                return
+        if is_path_ignored(request.path_info):
+            return
 
         # get the site domain
         domain = get_domain_for_category(category=None, strip_www=False)

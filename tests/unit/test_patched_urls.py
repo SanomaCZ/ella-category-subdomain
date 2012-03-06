@@ -35,7 +35,7 @@ class TestAbsoluteURLsCase(TestCase):
     def test_root_category_reverse_works_unaffected(self):
         from django.core.urlresolvers import reverse
         tools.assert_equals('http://example.com/', reverse('category_detail', args=('/',)))
-        
+
     def test_category_reverse_is_patched(self):
         from django.core.urlresolvers import reverse
         tools.assert_equals('http://nested-one.example.com/', reverse('category_detail', args=(self.category_nested_1.tree_path,)))
