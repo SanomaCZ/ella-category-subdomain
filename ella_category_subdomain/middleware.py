@@ -38,6 +38,7 @@ class CategorySubdomainMiddleware(object):
         if (self.category_subdomain is not None):
             self.log.debug("process view: %s, %s, %s", view_func, view_args, view_kwargs)
 
+            # skip ignored paths
             for prefix in ella_category_subdomain_settings.IGNORE_PATHS:
                 if request.path_info.startswith(prefix):
                     return
@@ -66,6 +67,11 @@ class CategorySubdomainRedirectMiddleware(object):
         subdomain is detected in the path (i.e. as if there was no subdomain) and redirects
         the request to correct subdomain URL.
         """
+        # skip for ignored paths
+        for prefix in ella_category_subdomain_settings.IGNORE_PATHS:
+            if request.path_info.startswith(prefix):
+                return
+
         # get the site domain
         domain = get_domain_for_category(category=None, strip_www=False)
         # get the current request host
