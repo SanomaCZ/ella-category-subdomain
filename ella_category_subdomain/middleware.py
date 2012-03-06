@@ -18,8 +18,6 @@ class CategorySubdomainMiddleware(object):
 
     def __init__(self):
         super(CategorySubdomainMiddleware, self).__init__()
-        self.static_prefixes = [settings.MEDIA_URL, ]
-        self.static_prefixes.extend(ella_category_subdomain_settings.IGNORE_PATHS)
         self.log = logging.getLogger("%s.%s" % (__name__, self.__class__.__name__))
 
     def process_request(self, request):
@@ -40,7 +38,7 @@ class CategorySubdomainMiddleware(object):
         if (self.category_subdomain is not None):
             self.log.debug("process view: %s, %s, %s", view_func, view_args, view_kwargs)
 
-            for prefix in self.static_prefixes:
+            for prefix in ella_category_subdomain_settings.IGNORE_PATHS:
                 if request.path_info.startswith(prefix):
                     return
 

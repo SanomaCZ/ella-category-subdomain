@@ -1,5 +1,6 @@
 from urlparse import urlparse, urlunparse
 
+from ella_category_subdomain.conf import IGNORE_PATHS
 from ella_category_subdomain.util import get_domain_for_category
 
 
@@ -46,6 +47,10 @@ def get_url(url):
 
     # parse url
     parsed_url = urlparse(url)
+
+    for prefix in ella_category_subdomain.IGNORE_PATHS:
+        if parsed_url.path.startswith(prefix):
+            return url
 
     # get non-empty URL path items
     path_items = [item for item in parsed_url.path.split('/') if (len(item) > 0)]
