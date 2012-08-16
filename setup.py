@@ -35,7 +35,7 @@ setup(
 
     install_requires = [
         'setuptools>=0.6b1',
-        'ella>=2.0',
+        'ella>=2.0,<3',
     ],
 )
 
